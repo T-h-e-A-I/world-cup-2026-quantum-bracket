@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { MODEL, useTournament } from "@/lib/store";
 import { favoriteIn, scenarioProbability } from "@/lib/engine";
-import { tname, pred, pct, adv, flag } from "@/lib/model";
+import { tname, pred, pct, adv } from "@/lib/model";
 import { downloadBracketCard } from "@/lib/cardImage";
 import { Flag } from "./Flag";
 import { Info } from "./Info";
@@ -132,22 +132,30 @@ export default function Bracket() {
   const complete = home.decided === 31;
   const oneIn = Math.round(1 / sp);
 
-  // champion + runner-up of the current scenario (favorite stands in until decided)
+  // champion of the current scenario (favorite stands in until the final is decided)
   const champId = results["L5-0"] ?? favoriteIn(W, 0, 5).id;
-  const fa = results["L4-0"];
-  const fb = results["L4-16"];
-  const runnerId = fa === champId ? fb : fa;
 
-  const saveImage = () =>
+  const saveImage = () => {
+    const nodes = MODEL.matches.map((m) => {
+      const a = slot(m, 0, results, W);
+      const b = slot(m, 1, results, W);
+      return {
+        level: m.level,
+        start: m.start,
+        aId: a.id,
+        bId: b.id,
+        winnerId: results[m.id] ?? favoriteIn(W, m.start, m.level).id,
+      };
+    });
     downloadBracketCard({
-      championName: tname(champId),
-      championFlag: flag(champId),
-      runnerName: runnerId !== undefined ? tname(runnerId) : "—",
-      runnerFlag: runnerId !== undefined ? flag(runnerId) : "",
+      nodes,
+      teams: MODEL.teams.map((t) => ({ name: t.name, flag: t.flag })),
+      championId: champId,
       headline: complete ? `1 in ${oneIn.toLocaleString()}` : pct(favoriteIn(W, 0, 5).p, 1),
       headlineLabel: complete ? "This exact bracket" : "Champion odds",
       decided: home.decided,
     });
+  };
 
   const shareText = complete
     ? `I built a 2026 World Cup where ${tname(champId)} win it all — odds 1 in ${oneIn.toLocaleString()}. Beat that 👇`
