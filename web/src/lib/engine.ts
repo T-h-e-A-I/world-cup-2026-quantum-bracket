@@ -101,10 +101,17 @@ export function modalPath(W: number[][], i: number): PathStep[] {
 }
 
 // ---- homepage "top realities" + collapse metrics ------------------------
+export interface Reality {
+  champion: number;
+  finalists: [number, number]; // the two teams in the final (champion is one of them)
+  p: number;                   // probability this exact complete bracket happens
+  winners: Results;            // every match's winner — load straight into the bracket
+}
+
 export interface Home {
   champions: { id: number; p: number }[];
   finals: { a: number; b: number; p: number }[];
-  chalk: { champion: number; p: number };
+  realities: Reality[];
   decided: number;
   realitiesLeft: number;
 }
@@ -118,30 +125,71 @@ export function homeView(W: number[][], results: Results): Home {
     for (let b = 16; b < 32; b++) finals.push({ a, b, p: W[a][4] * W[b][4] });
   finals.sort((x, y) => y.p - x.p);
 
-  // most-likely surviving complete bracket and its probability
-  let alive = Array.from({ length: N }, (_, i) => i);
-  let chalkP = 1;
-  while (alive.length > 1) {
-    const next: number[] = [];
-    for (let k = 0; k < alive.length; k += 2) {
-      const a = alive[k],
-        b = alive[k + 1],
-        wa = adv(a, b);
-      const [win, p] = wa >= 0.5 ? [a, wa] : [b, 1 - wa];
-      chalkP *= p;
-      next.push(win);
-    }
-    alive = next;
-  }
-
   const decided = MODEL.matches.filter((m) => results[m.id] !== undefined).length;
   return {
     champions,
     finals,
-    chalk: { champion: alive[0], p: chalkP },
+    realities: topRealities(results, 10),
     decided,
     realitiesLeft: 2 ** (N - 1 - decided),
   };
+}
+
+// ---- top-N most probable COMPLETE brackets -------------------------------
+// Tree DP: each subtree returns its best complete fill-ins. Keeping the top-N
+// per emergent winner is provably enough to recover the global top-N brackets
+// (a bracket can only be globally top-N if each half is top-N for its winner).
+interface SubOutcome { winner: number; p: number; winners: Results }
+
+function subOutcomes(level: number, start: number, results: Results, n: number): SubOutcome[] {
+  if (level === 0) return [{ winner: start, p: 1, winners: {} }];
+  const half = 1 << (level - 1);
+  const L = subOutcomes(level - 1, start, results, n);
+  const R = subOutcomes(level - 1, start + half, results, n);
+  const nodeId = `L${level}-${start}`;
+  const decided = results[nodeId];
+
+  const cands: { p: number; winner: number; li: number; ri: number }[] = [];
+  for (let li = 0; li < L.length; li++) {
+    for (let ri = 0; ri < R.length; ri++) {
+      const pair = L[li].p * R[ri].p;
+      if (pair === 0) continue;
+      const wl = L[li].winner, wr = R[ri].winner;
+      if (decided !== undefined) {
+        if (decided === wl) cands.push({ p: pair, winner: wl, li, ri });
+        else if (decided === wr) cands.push({ p: pair, winner: wr, li, ri });
+      } else {
+        cands.push({ p: pair * adv(wl, wr), winner: wl, li, ri });
+        cands.push({ p: pair * adv(wr, wl), winner: wr, li, ri });
+      }
+    }
+  }
+  cands.sort((a, b) => b.p - a.p);
+
+  const perWinner = new Map<number, number>();
+  const out: SubOutcome[] = [];
+  for (const c of cands) {
+    const k = perWinner.get(c.winner) ?? 0;
+    if (k >= n) continue;
+    perWinner.set(c.winner, k + 1);
+    out.push({
+      winner: c.winner, p: c.p,
+      winners: { ...L[c.li].winners, ...R[c.ri].winners, [nodeId]: c.winner },
+    });
+  }
+  return out;
+}
+
+export function topRealities(results: Results, n = 10): Reality[] {
+  return subOutcomes(L_MAX, 0, results, n)
+    .sort((a, b) => b.p - a.p)
+    .slice(0, n)
+    .map((o) => ({
+      champion: o.winner,
+      finalists: [o.winners["L4-0"], o.winners["L4-16"]] as [number, number],
+      p: o.p,
+      winners: o.winners,
+    }));
 }
 
 /** Favorite team to emerge from a subtree, with its probability (for ghost slots). */

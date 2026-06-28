@@ -10,6 +10,8 @@ export default function Home() {
   const { home } = useTournament();
   const topFinal = home.finals[0];
   const fav = home.champions[0];
+  const topRealityP = home.realities[0]?.p ?? 1;
+  const oneIn = (p: number) => (p > 0 ? `1 in ${Math.round(1 / p).toLocaleString()}` : "—");
 
   return (
     <div className="space-y-10">
@@ -96,22 +98,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* most-likely single reality */}
-      <section className="card overflow-hidden p-6 text-center">
-        <div className="text-xs uppercase tracking-widest text-faint">
-          The single most-likely reality
-        </div>
-        <div className="mt-3 text-2xl font-bold">
-          <span className="text-4xl">{flag(home.chalk.champion)}</span>{" "}
-          {tname(home.chalk.champion)} lift the cup
-        </div>
-        <p className="mt-2 text-sm text-mute">
-          The chalk bracket (every favorite wins) has probability{" "}
-          <span className="tabular text-ink">{pct(home.chalk.p, 3)}</span> — which is exactly why
-          one bracket is never the whole story.
+      {/* most probable complete realities */}
+      <section className="card p-5">
+        <SectionTitle hint="odds of this exact bracket">Most probable realities</SectionTitle>
+        <p className="mb-4 text-sm text-mute">
+          A “reality” is one complete bracket — all 31 results. Even the single most-likely one is a{" "}
+          <span className="text-ink">long shot</span>, which is the whole point: no one bracket owns
+          the future. Tap any to open it in Play Bracket.
         </p>
+        <ol className="space-y-1.5">
+          {home.realities.map((r, i) => {
+            const runnerUp = r.finalists[0] === r.champion ? r.finalists[1] : r.finalists[0];
+            const href = `/bracket?r=${encodeURIComponent(JSON.stringify(r.winners))}`;
+            return (
+              <li key={i}>
+                <a
+                  href={href}
+                  className="flex items-center gap-3 rounded-lg border border-transparent px-2 py-2 text-sm hover:border-line hover:bg-void2"
+                >
+                  <span className="w-4 text-xs text-faint">{i + 1}</span>
+                  <span className="text-lg">🏆</span>
+                  <span className="w-40 shrink-0 font-semibold">
+                    <TeamChip id={r.champion} />
+                  </span>
+                  <span className="hidden text-faint sm:inline">def.</span>
+                  <span className="hidden w-40 shrink-0 text-mute sm:block">
+                    <TeamChip id={runnerUp} />
+                  </span>
+                  <div className="ml-auto flex items-center gap-3">
+                    <div className="hidden w-24 sm:block"><Bar p={r.p / topRealityP} /></div>
+                    <span className="tabular w-20 text-right font-semibold">{oneIn(r.p)}</span>
+                    <span className="text-faint">→</span>
+                  </div>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
         <div className="mt-5 flex justify-center">
-          <ShareBar text="Every 2026 World Cup reality at once 🌌 — collapse the bracket:" />
+          <ShareBar text="Every 2026 World Cup reality at once ⚛️ — see the odds:" />
         </div>
       </section>
     </div>
