@@ -1,0 +1,49 @@
+name: Update live results
+
+# Hybrid auto-update: pulls finished knockout matches from football-data.org,
+# writes web/src/data/results.json, and opens a PR for you to review + merge.
+# Merging triggers a Vercel deploy, collapsing the bracket for everyone.
+#
+# Setup (one time):
+#   1. Get a free API token at https://www.football-data.org/client/register
+#   2. Repo -> Settings -> Secrets and variables -> Actions -> add FOOTBALL_DATA_TOKEN
+#   3. Repo -> Settings -> Actions -> General -> Workflow permissions:
+#        enable "Allow GitHub Actions to create and approve pull requests"
+# Without the secret the job is a harmless no-op (no PR).
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours during the tournament
+  workflow_dispatch: {} # run on demand from the Actions tab
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch + map results
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+        run: python engine/update_results.py
+      - name: Open / update PR if results changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          add-paths: web/src/data/results.json
+          branch: auto/results-update
+          commit-message: "Update live results"
+          title: "🔴 Live results — review & merge to collapse the bracket"
+          body: |
+            Automated from football-data.org.
+
+            Review the recorded winners below (and the run log for any matches
+            skipped due to penalties — add those with `python engine/update_results.py --set <FIFA match no> <team>`),
+            then merge to update the site.
+          labels: results
+          delete-branch: true

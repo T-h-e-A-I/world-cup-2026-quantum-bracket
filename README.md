@@ -79,15 +79,34 @@ cd web && npm run build                  # outputs web/out/
 
 ## Updating results (collapsing reality)
 
-As each match finishes, add it to [`web/src/data/results.json`](web/src/data/results.json):
+[`web/src/data/results.json`](web/src/data/results.json) is the single source of truth for
+the *real* collapse — it merges into every page for every visitor. Three ways to keep it live:
+
+**Automated (hybrid).** The [`Update live results`](.github/workflows/update-results.yml)
+workflow runs every 6 hours, pulls finished knockout matches from
+[football-data.org](https://www.football-data.org), maps each to its bracket node, and opens
+a **PR you review and merge**. Merging triggers a Vercel deploy. One-time setup:
+
+1. Get a free token at football-data.org and add it as the repo secret `FOOTBALL_DATA_TOKEN`.
+2. Settings → Actions → General → enable *“Allow GitHub Actions to create and approve pull requests.”*
+
+Without the secret the job is a harmless no-op. Penalty-shootout games are reported as draws
+by the API, so they're **skipped on purpose** and listed in the run log for manual entry.
+
+**Manual (easy).** Record a result by its FIFA match number — no node ids to memorise:
+
+```bash
+python engine/update_results.py --set 77 France   # Match 77 → France advance
+```
+
+**Manual (raw).** Edit the JSON directly. Node ids are `L{level}-{startIndex}` (level 1 =
+Round of 32 … 5 = Final); team ids are indices into `model.json`'s `teams` array:
 
 ```json
 { "L1-2": 2 }   // node "L1-2" (Match 77, France/Sweden) → winner = team id 2 (France)
 ```
 
-Node ids are `L{level}-{startIndex}` (level 1 = Round of 32 … 5 = Final); team ids are
-indices into `model.json`'s `teams` array. Commit and push — Vercel redeploys and the
-superposition collapses for everyone.
+Commit and push — Vercel redeploys and the superposition collapses for everyone.
 
 ## Deploy
 
