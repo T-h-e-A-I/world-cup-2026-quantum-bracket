@@ -3,10 +3,14 @@
 import { useMemo } from "react";
 import { MODEL, useTournament } from "@/lib/store";
 import { favoriteIn, scenarioProbability } from "@/lib/engine";
-import { tname, pred, pct, adv } from "@/lib/model";
+import { tname, pred, pct, adv, flag } from "@/lib/model";
+import { downloadBracketCard } from "@/lib/cardImage";
 import { Flag } from "./Flag";
 import { Info } from "./Info";
+import ShareBar from "./ShareBar";
 import type { MatchNode, Results } from "@/lib/types";
+
+const STRANGE_FUTURES = 14000605; // the futures Doctor Strange saw
 
 const byLevel = (lvl: number, half?: 0 | 1) =>
   MODEL.matches.filter(
@@ -123,8 +127,31 @@ function ChampionCore() {
 }
 
 export default function Bracket() {
-  const { home, results, exploring, randomize, reset } = useTournament();
+  const { W, home, results, exploring, randomize, chalk, chaos, reset } = useTournament();
   const sp = scenarioProbability(results);
+  const complete = home.decided === 31;
+  const oneIn = Math.round(1 / sp);
+
+  // champion + runner-up of the current scenario (favorite stands in until decided)
+  const champId = results["L5-0"] ?? favoriteIn(W, 0, 5).id;
+  const fa = results["L4-0"];
+  const fb = results["L4-16"];
+  const runnerId = fa === champId ? fb : fa;
+
+  const saveImage = () =>
+    downloadBracketCard({
+      championName: tname(champId),
+      championFlag: flag(champId),
+      runnerName: runnerId !== undefined ? tname(runnerId) : "—",
+      runnerFlag: runnerId !== undefined ? flag(runnerId) : "",
+      headline: complete ? `1 in ${oneIn.toLocaleString()}` : pct(favoriteIn(W, 0, 5).p, 1),
+      headlineLabel: complete ? "This exact bracket" : "Champion odds",
+      decided: home.decided,
+    });
+
+  const shareText = complete
+    ? `I built a 2026 World Cup where ${tname(champId)} win it all — odds 1 in ${oneIn.toLocaleString()}. Beat that 👇`
+    : `I'm collapsing the 2026 World Cup bracket — ${home.realitiesLeft.toLocaleString()} realities still in play 🌌`;
 
   return (
     <div>
@@ -140,24 +167,42 @@ export default function Bracket() {
         {home.decided > 0 && (
           <div className="card px-3 py-1.5 text-sm" title="How likely the model thinks this run of results is">
             <span className="text-mute">Scenario odds </span>
-            <span className="tabular font-bold">1 in {Math.round(1 / sp).toLocaleString()}</span>
+            <span className="tabular font-bold">1 in {oneIn.toLocaleString()}</span>
           </div>
         )}
-        <button
-          onClick={randomize}
-          title="Simulate one tournament — a model-weighted random complete bracket"
-          className="ml-auto chip px-3 py-1.5 text-sm font-medium hover:bg-void2"
-        >
-          🎲 Random
-        </button>
-        <button
-          onClick={reset}
-          disabled={!exploring}
-          className="chip px-3 py-1.5 text-sm text-mute enabled:hover:text-ink disabled:opacity-40"
-        >
-          ↺ Reset
-        </button>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <button
+            onClick={randomize}
+            title="Simulate one tournament — a model-weighted random complete bracket"
+            className="chip px-3 py-1.5 text-sm font-medium hover:bg-void2"
+          >
+            🎲 Random
+          </button>
+          <button
+            onClick={chalk}
+            title="Chalk — the favorite advances in every match (the single likeliest bracket)"
+            className="chip px-3 py-1.5 text-sm font-medium hover:bg-void2"
+          >
+            ✓ Chalk
+          </button>
+          <button
+            onClick={chaos}
+            title="Chaos — the underdog wins every match (the most cursed possible bracket)"
+            className="chip px-3 py-1.5 text-sm font-medium hover:bg-void2"
+          >
+            🔥 Chaos
+          </button>
+          <button
+            onClick={reset}
+            disabled={!exploring}
+            className="chip px-3 py-1.5 text-sm text-mute enabled:hover:text-ink disabled:opacity-40"
+          >
+            ↺ Reset
+          </button>
+        </div>
       </div>
+
+      {complete && <StrangeNote oneIn={oneIn} />}
 
       <p className="mb-4 flex items-center gap-1.5 text-sm text-mute">
         <span className="text-ink">Tap a team to advance it.</span>
@@ -191,6 +236,34 @@ export default function Bracket() {
           <Column label="R32" nodes={byLevel(1, 1)} />
         </div>
       </div>
+
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <ShareBar text={shareText} />
+        <button
+          onClick={saveImage}
+          title="Download this bracket as an image you can post anywhere"
+          className="chip px-4 py-2 text-sm font-medium hover:bg-void2"
+        >
+          ⬇ Save as image
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Compares a completed bracket's odds to Doctor Strange's 14,000,605 futures. */
+function StrangeNote({ oneIn }: { oneIn: number }) {
+  const ratio = oneIn / STRANGE_FUTURES;
+  const near = ratio >= 0.5 && ratio <= 2;
+  const msg = near
+    ? `almost exactly the ${STRANGE_FUTURES.toLocaleString()} Doctor Strange saw.`
+    : ratio > 2
+      ? `about ${Math.round(ratio)}× rarer than the ${STRANGE_FUTURES.toLocaleString()} Doctor Strange saw.`
+      : `about ${Math.round(1 / ratio)}× more likely than the ${STRANGE_FUTURES.toLocaleString()} Doctor Strange saw.`;
+  return (
+    <div className="mb-4 rounded-2xl border border-quantum/30 bg-quantum/5 px-4 py-3 text-sm">
+      🔮 <span className="font-semibold">This timeline is 1 in {oneIn.toLocaleString()}</span>{" "}
+      <span className="text-mute">— {msg}</span>
     </div>
   );
 }

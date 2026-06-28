@@ -4,7 +4,9 @@ import {
   createContext, useContext, useEffect, useMemo, useState, useCallback,
 } from "react";
 import { MODEL } from "./model";
-import { winsubTable, homeView, randomBracket, type Home } from "./engine";
+import {
+  winsubTable, homeView, randomBracket, chalkBracket, chaosBracket, type Home,
+} from "./engine";
 import { encodeResults, decodeResults } from "./share";
 import OFFICIAL from "@/data/results.json";
 import type { Results } from "./types";
@@ -21,6 +23,8 @@ interface Ctx {
   setResult: (nodeId: string, winner: number) => void;
   clearResult: (nodeId: string) => void;
   randomize: () => void; // draw one model-weighted random complete bracket
+  chalk: () => void;     // fill with the favorite every match (likeliest bracket)
+  chaos: () => void;     // fill with the underdog every match (most cursed bracket)
   reset: () => void;
   shareUrl: () => string;
 }
@@ -88,6 +92,8 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const randomize = useCallback(() => setOverlay(randomBracket(official)), []);
+  const chalk = useCallback(() => setOverlay(chalkBracket(official)), []);
+  const chaos = useCallback(() => setOverlay(chaosBracket(official)), []);
   const reset = useCallback(() => setOverlay({}), []);
 
   const shareUrl = useCallback(() => {
@@ -101,7 +107,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
   const value: Ctx = {
     results, W, home, decided: home.decided,
     exploring: Object.keys(overlay).length > 0,
-    setResult, clearResult, randomize, reset, shareUrl,
+    setResult, clearResult, randomize, chalk, chaos, reset, shareUrl,
   };
   return <TournamentCtx.Provider value={value}>{children}</TournamentCtx.Provider>;
 }

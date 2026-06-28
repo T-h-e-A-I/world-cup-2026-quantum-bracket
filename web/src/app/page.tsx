@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useTournament } from "@/lib/store";
 import { topRealities } from "@/lib/engine";
-import { MODEL, pct, tname, big, pred } from "@/lib/model";
+import { MODEL, pct, tname, big, pred, slug } from "@/lib/model";
 import { TeamChip, Bar, Pct, Score } from "@/components/ui";
 import { Flag } from "@/components/Flag";
 import { Info } from "@/components/Info";
@@ -77,15 +77,20 @@ export default function Home() {
           <H2 hint="chance to win it all">Title favorites</H2>
           <ol className="rows mt-2">
             {home.champions.slice(0, 8).map((c, i) => (
-              <li key={c.id} className="flex items-center gap-3 py-2.5">
-                <span className="w-4 text-xs text-faint">{i + 1}</span>
-                <div className="w-36 shrink-0 sm:w-44">
-                  <TeamChip id={c.id} />
-                </div>
-                <div className="flex-1">
-                  <Bar p={c.p} gold={i === 0} />
-                </div>
-                <Pct p={c.p} className="w-14 text-right text-sm font-semibold" />
+              <li key={c.id}>
+                <Link
+                  href={`/team/${slug(c.id)}`}
+                  className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2.5 hover:bg-void2"
+                >
+                  <span className="w-4 text-xs text-faint">{i + 1}</span>
+                  <div className="w-36 shrink-0 sm:w-44">
+                    <TeamChip id={c.id} />
+                  </div>
+                  <div className="flex-1">
+                    <Bar p={c.p} gold={i === 0} />
+                  </div>
+                  <Pct p={c.p} className="w-14 text-right text-sm font-semibold" />
+                </Link>
               </li>
             ))}
           </ol>

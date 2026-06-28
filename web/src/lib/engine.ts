@@ -214,15 +214,30 @@ export function favoriteIn(W: number[][], start: number, level: number): { id: n
   return { id, p: best };
 }
 
-/** Simulate one full tournament: fill every match with a model-weighted random winner. */
-export function randomBracket(base: Results = {}): Results {
+/** Fill every undecided match by `pick`, respecting already-collapsed results in `base`. */
+function fillBracket(base: Results, pick: (a: number, b: number) => number): Results {
   const out: Results = {};
   for (const m of MODEL.matches) {
     const a = m.teams ? m.teams[0] : out[m.feeders![0]];
     const b = m.teams ? m.teams[1] : out[m.feeders![1]];
-    out[m.id] = base[m.id] !== undefined ? base[m.id] : Math.random() < adv(a, b) ? a : b;
+    out[m.id] = base[m.id] !== undefined ? base[m.id] : pick(a, b);
   }
   return out;
+}
+
+/** Simulate one full tournament: fill every match with a model-weighted random winner. */
+export function randomBracket(base: Results = {}): Results {
+  return fillBracket(base, (a, b) => (Math.random() < adv(a, b) ? a : b));
+}
+
+/** Chalk: the model favorite advances in every match (the single most likely bracket). */
+export function chalkBracket(base: Results = {}): Results {
+  return fillBracket(base, (a, b) => (adv(a, b) >= 0.5 ? a : b));
+}
+
+/** Chaos: the underdog springs the upset in every match (the least likely surviving bracket). */
+export function chaosBracket(base: Results = {}): Results {
+  return fillBracket(base, (a, b) => (adv(a, b) < 0.5 ? a : b));
 }
 
 /** Probability of the picks made so far = product of each decided match's model odds. */

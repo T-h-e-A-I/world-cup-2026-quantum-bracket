@@ -34,5 +34,17 @@ export const pct = (p: number, d = 1): string =>
 export const flag = (id: number): string => TEAMS[id].flag;
 export const tname = (id: number): string => TEAMS[id].name;
 
+// ---- URL slugs (per-team shareable / SEO pages) -------------------------
+export const slug = (id: number): string =>
+  TEAMS[id].name
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const SLUG_TO_ID = new Map(TEAMS.map((t) => [slug(t.id), t.id]));
+export const idFromSlug = (s: string): number | undefined => SLUG_TO_ID.get(s);
+export const allSlugs = (): string[] => TEAMS.map((t) => slug(t.id));
+
 /** "2,147,483,648" style. */
 export const big = (n: number): string => n.toLocaleString("en-US");

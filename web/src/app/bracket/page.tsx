@@ -1,7 +1,6 @@
 import Bracket from "@/components/Bracket";
-import ShareBar from "@/components/ShareBar";
 
-export const metadata = { title: "Play Bracket — Quantum Bracket" };
+export const metadata = { title: "Play Bracket" };
 
 export default function BracketPage() {
   return (
@@ -10,9 +9,6 @@ export default function BracketPage() {
         Play out the <span className="grad-text">bracket</span>
       </h1>
       <Bracket />
-      <div className="mt-6">
-        <ShareBar text="I'm collapsing the 2026 World Cup bracket 🌌" />
-      </div>
     </div>
   );
 }
