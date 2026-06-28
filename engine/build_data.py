@@ -11,7 +11,7 @@ replacing engine/model.py — the bundle shape and the whole web app stay identi
 """
 import json
 import os
-from bracket import TEAMS, NAMES, ELO, N, ROUNDS, matches
+from bracket import TEAMS, NAMES, ELO, ISO, N, ROUNDS, matches
 from model import match, advance_prob
 from engine import compute   # used only for a sanity printout
 
@@ -21,7 +21,7 @@ HALF = lambda i: 0 if i < 16 else 1
 def build():
     elos = [ELO[NAMES[i]] for i in range(N)]
 
-    teams = [{"id": i, "name": NAMES[i], "flag": TEAMS[i][1],
+    teams = [{"id": i, "name": NAMES[i], "flag": TEAMS[i][1], "iso": ISO[NAMES[i]],
               "elo": elos[i], "half": HALF(i)} for i in range(N)]
 
     # adv[i][j] = P(i eliminates j) — the only thing the bracket DP needs.

@@ -3,7 +3,8 @@
 export interface Team {
   id: number;
   name: string;
-  flag: string;
+  flag: string; // emoji fallback
+  iso: string;  // flagcdn code (e.g. "ar", "gb-eng") for real flag images
   elo: number;
   half: 0 | 1; // 0 = left side of the bracket, 1 = right
 }

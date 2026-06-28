@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useTournament } from "@/lib/store";
 import { probMeet, meetLevel } from "@/lib/engine";
-import { ROUNDS, tname, flag, pct, pred } from "@/lib/model";
-import { TeamChip, Bar, Pct, Score, Confidence } from "@/components/ui";
+import { ROUNDS, tname, pct, pred } from "@/lib/model";
+import { Bar, Pct, Score, Confidence } from "@/components/ui";
+import { Flag } from "@/components/Flag";
 import TeamSelect from "@/components/TeamSelect";
 import ShareBar from "@/components/ShareBar";
 
@@ -22,71 +23,73 @@ export default function MatchupPage() {
   const favA = pr.score[0] >= pr.score[1];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="mb-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
-          Will They <span className="grad-text">Meet?</span>
-        </h1>
-        <p className="text-sm text-mute">
+    <div className="space-y-10">
+      <header>
+        <h1 className="text-3xl font-bold sm:text-4xl">Will they meet?</h1>
+        <p className="mt-1 text-sm text-mute">
           Because the bracket is fixed, any two teams can collide in exactly{" "}
-          <span className="text-ink">one</span> round. Here’s where, how likely, and the predicted
-          result.
+          <span className="text-ink">one</span> round.
         </p>
+      </header>
+
+      <div className="grid items-end gap-4 sm:grid-cols-[1fr_auto_1fr]">
+        <TeamSelect value={a} onChange={setA} exclude={b} label="Team A" />
+        <div className="hidden pb-2.5 text-center text-sm text-faint sm:block">vs</div>
+        <TeamSelect value={b} onChange={setB} exclude={a} label="Team B" />
       </div>
 
-      <div className="card p-5">
-        <div className="grid items-end gap-4 sm:grid-cols-[1fr_auto_1fr]">
-          <TeamSelect value={a} onChange={setA} exclude={b} label="Team A" />
-          <div className="pb-2 text-center text-sm text-faint">vs</div>
-          <TeamSelect value={b} onChange={setB} exclude={a} label="Team B" />
-        </div>
-      </div>
-
-      <div className="card overflow-hidden p-6 text-center">
+      {/* result */}
+      <section className="rounded-3xl bg-void2 p-6 text-center sm:p-8">
         <div className="text-xs uppercase tracking-widest text-faint">Earliest &amp; only meeting</div>
-        <div className="mt-1 text-2xl font-extrabold grad-text">{round}</div>
+        <div className="mt-1 text-3xl font-bold text-quantum">{round}</div>
 
-        <div className="mt-5 flex items-center justify-center gap-4 text-lg">
-          <span className="flex items-center gap-2"><span className="text-3xl">{flag(a)}</span>{tname(a)}</span>
+        <div className="mt-6 flex items-center justify-center gap-3 text-lg sm:gap-5 sm:text-xl">
+          <span className="flex items-center gap-2 font-semibold">
+            <Flag id={a} className="h-6 w-9 rounded object-cover ring-1 ring-black/10" />
+            <span className="hidden sm:inline">{tname(a)}</span>
+          </span>
           <Score a={pr.score[0]} b={pr.score[1]} />
-          <span className="flex items-center gap-2">{tname(b)}<span className="text-3xl">{flag(b)}</span></span>
+          <span className="flex items-center gap-2 font-semibold">
+            <span className="hidden sm:inline">{tname(b)}</span>
+            <Flag id={b} className="h-6 w-9 rounded object-cover ring-1 ring-black/10" />
+          </span>
         </div>
         <div className="mt-3 flex items-center justify-center gap-3 text-sm">
           <Confidence label={pr.confidenceLabel} value={pr.confidence} />
-          <span className="text-mute">
-            edge: <span className="text-ink">{favA ? tname(a) : tname(b)}</span>
-          </span>
+          <span className="text-mute">edge <span className="text-ink">{favA ? tname(a) : tname(b)}</span></span>
         </div>
 
         <div className="mx-auto mt-6 max-w-md">
           <div className="mb-1 flex items-center justify-between text-sm">
             <span className="text-mute">Probability they actually meet</span>
-            <Pct p={p} className="font-bold text-flux" />
+            <Pct p={p} className="font-bold text-quantum" />
           </div>
           <Bar p={p} />
         </div>
-      </div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         <ReachCard id={a} round={round} p={reachA} />
         <ReachCard id={b} round={round} p={reachB} />
       </div>
 
       <p className="text-center text-xs text-faint">
-        P(meet) = P({tname(a)} reaches {round}) × P({tname(b)} reaches {round}) ={" "}
-        {pct(reachA)} × {pct(reachB)} = <span className="text-mute">{pct(p)}</span>
+        P(meet) = P({tname(a)} reaches {round}) × P({tname(b)} reaches {round}) = {pct(reachA)} ×{" "}
+        {pct(reachB)} = <span className="text-mute">{pct(p)}</span>
       </p>
 
-      <ShareBar text={`Can ${tname(a)} and ${tname(b)} meet at the 2026 World Cup? Only in the ${round} — ${pct(p)} chance 🌌`} />
+      <ShareBar text={`Can ${tname(a)} and ${tname(b)} meet at the 2026 World Cup? Only in the ${round} — ${pct(p)} chance`} />
     </div>
   );
 }
 
 function ReachCard({ id, round, p }: { id: number; round: string; p: number }) {
   return (
-    <div className="card p-4">
+    <div className="rounded-2xl bg-void2 p-4">
       <div className="flex items-center justify-between">
-        <TeamChip id={id} className="font-semibold" />
+        <span className="inline-flex items-center gap-2 font-semibold">
+          <Flag id={id} /> {tname(id)}
+        </span>
         <Pct p={p} className="font-bold" />
       </div>
       <div className="mt-2"><Bar p={p} /></div>

@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useTournament } from "@/lib/store";
 import { reach, modalPath, finalOpponents } from "@/lib/engine";
-import { tname, flag, pct, pred } from "@/lib/model";
-import { TeamChip, Bar, Pct, SectionTitle, Score, Confidence } from "@/components/ui";
+import { tname, pct, pred } from "@/lib/model";
+import { TeamChip, Bar, Pct, Score, Confidence } from "@/components/ui";
+import { Flag } from "@/components/Flag";
 import TeamSelect from "@/components/TeamSelect";
 import ShareBar from "@/components/ShareBar";
 
@@ -26,35 +27,35 @@ export default function TeamPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="mb-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
-          My Team’s <span className="grad-text">Odds</span>
-        </h1>
-        <p className="text-sm text-mute">
-          One team. 64 routes to the final × 16 possible opponents ={" "}
-          <span className="text-ink">1,024</span> final scenarios — all exact.
+    <div className="space-y-12">
+      <header>
+        <h1 className="text-3xl font-bold sm:text-4xl">My team’s odds</h1>
+        <p className="mt-1 text-sm text-mute">
+          64 routes to the final × 16 possible opponents = <span className="text-ink">1,024</span>{" "}
+          final scenarios — all exact.
         </p>
-      </div>
+      </header>
 
-      <div className="card p-5">
+      {/* selector + reach */}
+      <section>
         <div className="max-w-sm">
           <TeamSelect value={id} onChange={setId} label="Pick your team" />
         </div>
-        <div className="mt-5 flex items-center gap-3">
-          <span className="text-5xl">{flag(id)}</span>
+        <div className="mt-6 flex items-center gap-4">
+          <Flag id={id} className="h-12 w-16 rounded-lg object-cover shadow-sm ring-1 ring-black/10" />
           <div>
-            <div className="text-xl font-bold">{tname(id)}</div>
+            <div className="text-2xl font-bold">{tname(id)}</div>
             <div className="text-xs text-faint">
-              Champion probability <Pct p={r.champion} className="text-champ" />
+              Champion probability{" "}
+              <Pct p={r.champion} className="font-semibold text-champ" />
             </div>
           </div>
         </div>
 
-        <div className="mt-5 space-y-2.5">
+        <div className="mt-6 space-y-3">
           {steps.map((s, i) => (
             <div key={s.label} className="flex items-center gap-3">
-              <div className="w-36 shrink-0 text-sm text-mute">{s.label}</div>
+              <div className="w-32 shrink-0 text-sm text-mute sm:w-40">{s.label}</div>
               <div className="flex-1">
                 <Bar p={s.p} gold={i === steps.length - 1} />
               </div>
@@ -62,26 +63,24 @@ export default function TeamPage() {
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* modal path */}
-      <div className="card p-5">
-        <SectionTitle hint="strongest expected opponent each round">
-          Most likely path to the final
-        </SectionTitle>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section>
+        <H2 hint="strongest expected opponent each round">Most likely path to the final</H2>
+        <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
           {path.map((st) => {
             const p = pred(id, st.opp);
             return (
-              <div key={st.level} className="rounded-xl border border-line bg-white/[0.03] p-3">
+              <div key={st.level} className="rounded-2xl bg-void2 p-3.5">
                 <div className="text-[10px] uppercase tracking-widest text-faint">
                   {ROUND_LABELS[st.level - 1]}
                 </div>
-                <div className="mt-1 flex items-center gap-2">
+                <div className="mt-1.5 flex items-center gap-2">
                   <span className="text-mute">vs</span>
                   <TeamChip id={st.opp} className="font-semibold" />
                 </div>
-                <div className="mt-2 flex items-center gap-2 text-xs">
+                <div className="mt-2.5 flex items-center gap-2 text-xs">
                   <Score a={p.score[0]} b={p.score[1]} />
                   <Confidence label={p.confidenceLabel} value={p.confidence} />
                 </div>
@@ -93,52 +92,55 @@ export default function TeamPage() {
             );
           })}
         </div>
-      </div>
+      </section>
 
       {/* 16 finals */}
-      <div className="card p-5">
-        <SectionTitle hint="from the opposite half of the draw">
-          All 16 possible final opponents
-        </SectionTitle>
-        <div className="overflow-x-auto">
+      <section>
+        <H2 hint="from the opposite half of the draw">All 16 possible final opponents</H2>
+        <div className="mt-2 overflow-x-auto">
           <table className="w-full min-w-[560px] text-sm">
             <thead className="text-left text-xs uppercase tracking-wider text-faint">
               <tr className="border-b border-line">
                 <th className="py-2 font-medium">Opponent</th>
-                <th className="py-2 font-medium">This exact final</th>
-                <th className="py-2 font-medium">Win it vs them</th>
+                <th className="py-2 font-medium">This final</th>
+                <th className="py-2 font-medium">Win it</th>
                 <th className="py-2 font-medium">Predicted</th>
                 <th className="py-2 font-medium">Confidence</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="rows">
               {finals.map((f) => {
                 const p = pred(id, f.opp);
                 return (
-                  <tr key={f.opp} className="border-b border-line/60 hover:bg-white/[0.03]">
-                    <td className="py-2">
-                      <TeamChip id={f.opp} />
-                    </td>
-                    <td className="py-2">
+                  <tr key={f.opp} className="hover:bg-void2">
+                    <td className="py-2.5"><TeamChip id={f.opp} /></td>
+                    <td className="py-2.5">
                       <div className="flex items-center gap-2">
-                        <div className="w-20"><Bar p={f.pFinal} /></div>
+                        <div className="w-16 sm:w-20"><Bar p={f.pFinal} /></div>
                         <Pct p={f.pFinal} className="text-xs" />
                       </div>
                     </td>
-                    <td className="py-2">
-                      <Pct p={f.pWin} className="font-semibold text-champ" />
-                    </td>
-                    <td className="py-2"><Score a={p.score[0]} b={p.score[1]} /></td>
-                    <td className="py-2"><Confidence label={p.confidenceLabel} value={p.confidence} /></td>
+                    <td className="py-2.5"><Pct p={f.pWin} className="font-semibold text-champ" /></td>
+                    <td className="py-2.5"><Score a={p.score[0]} b={p.score[1]} /></td>
+                    <td className="py-2.5"><Confidence label={p.confidenceLabel} value={p.confidence} /></td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      <ShareBar text={`${tname(id)} at the 2026 World Cup — ${pct(r.champion)} to win it all 🌌`} />
+      <ShareBar text={`${tname(id)} at the 2026 World Cup — ${pct(r.champion)} to win it all`} />
+    </div>
+  );
+}
+
+function H2({ children, hint }: { children: React.ReactNode; hint?: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
+      <h2 className="text-xl font-bold">{children}</h2>
+      {hint && <span className="hidden text-xs text-faint sm:inline">{hint}</span>}
     </div>
   );
 }

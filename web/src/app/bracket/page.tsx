@@ -13,10 +13,11 @@ export default function BracketPage() {
         Tap a team to send it through and fill in your own bracket. Watch the odds and the number of
         possible brackets update with every pick.
       </p>
-      <p className="mb-5 inline-flex items-center gap-2 rounded-lg border border-line bg-void2 px-3 py-2 text-xs text-mute">
-        <span aria-hidden>💡</span>
-        This is your personal <strong className="text-ink">what-if</strong> bracket. It’s just for
-        fun — it never changes the real odds on the other pages. Hit <em>Reset</em> anytime.
+      <p className="mb-5 rounded-xl border border-line bg-void2 px-3.5 py-2.5 text-xs leading-relaxed text-mute">
+        <span aria-hidden className="mr-1">↻</span>
+        Your picks <strong className="text-ink">collapse the whole site</strong> — odds on every page
+        update to match this scenario. The top bar shows how many matches are decided; hit{" "}
+        <em>Reset</em> there to go back to today.
       </p>
       <Bracket />
       <div className="mt-6">

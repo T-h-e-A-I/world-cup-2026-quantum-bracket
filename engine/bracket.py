@@ -55,6 +55,18 @@ NAMES = [t[0] for t in TEAMS]
 FLAGS = {t[0]: t[1] for t in TEAMS}
 ELO = {t[0]: t[2] for t in TEAMS}
 
+# ISO 3166-1 alpha-2 codes (flagcdn) for real flag images. England = gb-eng.
+ISO = {
+    "Germany": "de", "Paraguay": "py", "France": "fr", "Sweden": "se",
+    "South Africa": "za", "Canada": "ca", "Netherlands": "nl", "Morocco": "ma",
+    "Portugal": "pt", "Croatia": "hr", "Spain": "es", "Austria": "at",
+    "United States": "us", "Bosnia & Herzegovina": "ba", "Belgium": "be", "Senegal": "sn",
+    "Brazil": "br", "Japan": "jp", "Ivory Coast": "ci", "Norway": "no",
+    "Mexico": "mx", "Ecuador": "ec", "England": "gb-eng", "Congo DR": "cd",
+    "Argentina": "ar", "Cabo Verde": "cv", "Australia": "au", "Egypt": "eg",
+    "Switzerland": "ch", "Algeria": "dz", "Colombia": "co", "Ghana": "gh",
+}
+
 N = len(TEAMS)  # 32
 ROUNDS = ["Round of 32", "Round of 16", "Quarterfinal", "Semifinal", "Final"]
 # level L (subtree size 2^L) -> name of the match played to win that subtree

@@ -8,18 +8,15 @@ import { winsubTable, homeView, type Home } from "./engine";
 import OFFICIAL from "@/data/results.json";
 import type { Results } from "./types";
 
-const STORAGE_KEY = "wc26-results-v2"; // v2: overlay is bracket-sandbox only
+const STORAGE_KEY = "wc26-results-v3";
 const official = OFFICIAL as Results; // real completed matches the repo maintains
 
 interface Ctx {
-  // ---- reality (official results only): Home, My Team, Will They Meet ----
+  results: Results;   // official + your picks — drives EVERY page (the live collapse)
   W: number[][];
   home: Home;
-  // ---- sandbox (official + your exploration): the Collapse-the-Bracket page ----
-  sbResults: Results;
-  sbW: number[][];
-  sbHome: Home;
-  exploring: boolean;
+  decided: number;    // matches decided so far (official + picks)
+  exploring: boolean; // you have added picks beyond the official results
   setResult: (nodeId: string, winner: number) => void;
   clearResult: (nodeId: string) => void;
   reset: () => void;
@@ -41,7 +38,6 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
   const [overlay, setOverlay] = useState<Results>({});
   const [hydrated, setHydrated] = useState(false);
 
-  // hydrate the sandbox overlay from URL (?r=) or localStorage after mount
   useEffect(() => {
     let loaded: Results = {};
     try {
@@ -68,19 +64,14 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
     }
   }, [overlay, hydrated]);
 
-  // reality — never affected by the user's bracket doodles
-  const W = useMemo(() => winsubTable(official), []);
-  const home = useMemo(() => homeView(W, official), [W]);
-
-  // sandbox — reality plus the user's exploration
-  const sbResults = useMemo<Results>(() => ({ ...official, ...overlay }), [overlay]);
-  const sbW = useMemo(() => winsubTable(sbResults), [sbResults]);
-  const sbHome = useMemo(() => homeView(sbW, sbResults), [sbW, sbResults]);
+  const results = useMemo<Results>(() => ({ ...official, ...overlay }), [overlay]);
+  const W = useMemo(() => winsubTable(results), [results]);
+  const home = useMemo(() => homeView(W, results), [W, results]);
 
   const setResult = useCallback((nodeId: string, winner: number) => {
     setOverlay((prev) => {
       const next = { ...prev, [nodeId]: winner };
-      for (const a of ancestors(nodeId)) delete next[a]; // invalidate stale parents
+      for (const a of ancestors(nodeId)) delete next[a];
       return next;
     });
   }, []);
@@ -104,11 +95,10 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
     return u.toString();
   }, [overlay]);
 
-  const exploring = Object.keys(overlay).length > 0;
-
   const value: Ctx = {
-    W, home,
-    sbResults, sbW, sbHome, exploring, setResult, clearResult, reset, shareUrl,
+    results, W, home, decided: home.decided,
+    exploring: Object.keys(overlay).length > 0,
+    setResult, clearResult, reset, shareUrl,
   };
   return <TournamentCtx.Provider value={value}>{children}</TournamentCtx.Provider>;
 }

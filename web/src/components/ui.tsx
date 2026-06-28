@@ -1,9 +1,10 @@
-import { flag, tname, pct } from "@/lib/model";
+import { tname, pct } from "@/lib/model";
+import { Flag } from "./Flag";
 
 export function TeamChip({ id, className = "" }: { id: number; className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 ${className}`}>
-      <span className="text-base leading-none">{flag(id)}</span>
+    <span className={`inline-flex items-center gap-2 ${className}`}>
+      <Flag id={id} />
       <span className="truncate">{tname(id)}</span>
     </span>
   );
@@ -26,10 +27,15 @@ const CONF: Record<string, string> = {
   Medium: "text-flux border-flux/40 bg-flux/10",
   "Toss-up": "text-down border-down/40 bg-down/10",
 };
+/** value = decisiveness 0–100 → the favoured side's win chance = 50 + value/2. */
 export function Confidence({ label, value }: { label: string; value: number }) {
+  const likely = Math.round(50 + value / 2);
   return (
-    <span className={`chip px-2 py-0.5 text-[11px] font-medium ${CONF[label] ?? ""}`}>
-      {label} · {value}
+    <span
+      title="The model's chance that the predicted result happens"
+      className={`chip px-2 py-0.5 text-[11px] font-medium ${CONF[label] ?? ""}`}
+    >
+      {likely}% likely
     </span>
   );
 }

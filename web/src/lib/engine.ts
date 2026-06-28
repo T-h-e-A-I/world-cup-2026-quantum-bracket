@@ -111,7 +111,6 @@ export interface Reality {
 export interface Home {
   champions: { id: number; p: number }[];
   finals: { a: number; b: number; p: number }[];
-  realities: Reality[];
   decided: number;
   realitiesLeft: number;
 }
@@ -129,7 +128,6 @@ export function homeView(W: number[][], results: Results): Home {
   return {
     champions,
     finals,
-    realities: topRealities(results, 10),
     decided,
     realitiesLeft: 2 ** (N - 1 - decided),
   };
@@ -199,6 +197,19 @@ export function favoriteIn(W: number[][], start: number, level: number): { id: n
   for (let t = start; t < start + size; t++)
     if (W[t][level] > best) { best = W[t][level]; id = t; }
   return { id, p: best };
+}
+
+/** Probability of the picks made so far = product of each decided match's model odds. */
+export function scenarioProbability(results: Results): number {
+  let p = 1;
+  for (const m of MODEL.matches) {
+    const w = results[m.id];
+    if (w === undefined) continue;
+    const part = participants(m.id, results);
+    if (!part) continue;
+    p *= adv(w, part[0] === w ? part[1] : part[0]);
+  }
+  return p;
 }
 
 /** A node is playable once both its feeders are decided (R32 always playable). */

@@ -2,8 +2,9 @@
 
 import { useMemo } from "react";
 import { MODEL, useTournament } from "@/lib/store";
-import { favoriteIn } from "@/lib/engine";
-import { flag, tname, pred, pct } from "@/lib/model";
+import { favoriteIn, scenarioProbability } from "@/lib/engine";
+import { tname, pred, pct, adv } from "@/lib/model";
+import { Flag } from "./Flag";
 import type { MatchNode, Results } from "@/lib/types";
 
 const byLevel = (lvl: number, half?: 0 | 1) =>
@@ -23,7 +24,7 @@ function slot(node: MatchNode, side: 0 | 1, results: Results, W: number[][]): Sl
 }
 
 function MatchCard({ node }: { node: MatchNode }) {
-  const { sbResults: results, sbW: W, setResult, clearResult } = useTournament();
+  const { results, W, setResult, clearResult } = useTournament();
   const a = slot(node, 0, results, W);
   const b = slot(node, 1, results, W);
   const playable = a.decided && b.decided;
@@ -33,6 +34,8 @@ function MatchCard({ node }: { node: MatchNode }) {
   const Row = ({ s }: { s: Slot }) => {
     const isWin = winner === s.id;
     const isLose = winner !== undefined && winner !== s.id;
+    const oppId = s.id === a.id ? b.id : a.id;
+    const winPct = Math.round(adv(s.id, oppId) * 100); // model's chance this side wins the game
     return (
       <button
         disabled={!playable}
@@ -44,10 +47,14 @@ function MatchCard({ node }: { node: MatchNode }) {
           ${playable && !isWin ? "hover:bg-white/10 cursor-pointer" : ""}
           ${!playable ? "cursor-default" : ""}`}
       >
-        <span className="text-sm leading-none">{flag(s.id)}</span>
+        <Flag id={s.id} />
         <span className={`truncate ${s.decided ? "" : "italic text-mute"}`}>{tname(s.id)}</span>
         {!s.decided && <span className="ml-auto tabular text-[10px] text-faint">{pct(s.p, 0)}</span>}
-        {isWin && <span className="ml-auto text-quantum">✓</span>}
+        {isWin && (
+          <span className="ml-auto tabular text-[10px] font-semibold text-quantum" title="Model's chance this team won this game">
+            {winPct}%
+          </span>
+        )}
       </button>
     );
   };
@@ -83,26 +90,35 @@ function Column({ nodes, label }: { nodes: MatchNode[]; label: string }) {
 }
 
 function ChampionCore() {
-  const { sbW: W, sbResults: results } = useTournament();
+  const { W, results } = useTournament();
   const fav = useMemo(() => favoriteIn(W, 0, 5), [W]);
   const finalDecided = results["L5-0"] !== undefined;
+  const sp = scenarioProbability(results);
   return (
     <div className="flex flex-col items-center justify-center gap-2 px-2">
       <div className="text-[10px] font-semibold uppercase tracking-widest text-champ">
         {finalDecided ? "Champion" : "Most likely champion"}
       </div>
-      <div className="card border-champ/40 px-3 py-3 text-center">
-        <div className="text-3xl">{finalDecided ? "🏆" : "🌌"}</div>
-        <div className="mt-1 text-2xl">{flag(fav.id)}</div>
-        <div className="text-sm font-bold">{tname(fav.id)}</div>
-        <div className="tabular text-xs text-champ">{pct(fav.p, 1)}</div>
+      <div className="rounded-2xl border border-champ/30 bg-champ/5 px-4 py-4 text-center">
+        <Flag id={fav.id} className="mx-auto h-9 w-14 rounded-md object-cover shadow-sm ring-1 ring-black/10" />
+        <div className="mt-2 text-sm font-bold">{tname(fav.id)}</div>
+        {finalDecided ? (
+          <div className="tabular text-[11px] text-mute">
+            this exact bracket:
+            <br />
+            <span className="font-semibold text-ink">1 in {Math.round(1 / sp).toLocaleString()}</span>
+          </div>
+        ) : (
+          <div className="tabular text-xs font-semibold text-champ">{pct(fav.p, 1)} to win</div>
+        )}
       </div>
     </div>
   );
 }
 
 export default function Bracket() {
-  const { sbHome: home, exploring, reset } = useTournament();
+  const { home, results, exploring, reset } = useTournament();
+  const sp = scenarioProbability(results);
 
   return (
     <div>
@@ -115,6 +131,12 @@ export default function Bracket() {
           <span className="text-mute">Picked </span>
           <span className="tabular font-bold">{home.decided}/31</span>
         </div>
+        {home.decided > 0 && (
+          <div className="card px-3 py-1.5 text-sm" title="How likely the model thinks this run of results is">
+            <span className="text-mute">Scenario odds </span>
+            <span className="tabular font-bold">1 in {Math.round(1 / sp).toLocaleString()}</span>
+          </div>
+        )}
         <button
           onClick={reset}
           disabled={!exploring}
