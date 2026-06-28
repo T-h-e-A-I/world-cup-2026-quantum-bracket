@@ -120,22 +120,38 @@ export function drawBracketCard(x: CanvasRenderingContext2D, d: BracketCard): vo
   }
   x.textAlign = "left";
 
+  // The final is rendered as a prominent champion card at dead center; both
+  // semifinals converge straight into it (no redundant little "final" box).
+  const champW = 178;
+  const champH = 144;
+  const champCx = PAD + 4 * COLW + COLW / 2;
+  const champCy = TOP + BH / 2;
+  const champL = champCx - champW / 2;
+  const champR = champCx + champW / 2;
+
   // connectors (child -> parent), drawn under the boxes
   x.strokeStyle = LINE;
   x.lineWidth = 2;
   for (const n of d.nodes) {
     if (n.level >= 5) continue;
     const r = rectOf(n.level, n.start);
-    const pStart = (n.start >> (n.level + 1)) << (n.level + 1);
-    const p = rectOf(n.level + 1, pStart);
     const fromX = r.side === 0 ? r.x + BOXW : r.x;
-    const toX = r.side === 0 ? p.x : p.x + BOXW;
+    let toX: number, pcy: number;
+    if (n.level === 4) {
+      pcy = champCy; // semifinal winners feed the champion card
+      toX = r.side === 0 ? champL : champR;
+    } else {
+      const pStart = (n.start >> (n.level + 1)) << (n.level + 1);
+      const p = rectOf(n.level + 1, pStart);
+      pcy = p.cy;
+      toX = r.side === 0 ? p.x : p.x + BOXW;
+    }
     const midX = (fromX + toX) / 2;
     x.beginPath();
     x.moveTo(fromX, r.cy);
     x.lineTo(midX, r.cy);
-    x.lineTo(midX, p.cy);
-    x.lineTo(toX, p.cy);
+    x.lineTo(midX, pcy);
+    x.lineTo(toX, pcy);
     x.stroke();
   }
 
@@ -171,31 +187,36 @@ export function drawBracketCard(x: CanvasRenderingContext2D, d: BracketCard): vo
     }
   };
 
-  // every match (R32 .. Final)
-  for (const n of d.nodes) drawBox(n.level, n.start, n.aId, n.bId, n.winnerId);
+  // every match except the final (R32 .. SF) — the final lives in the champion card
+  for (const n of d.nodes) if (n.level < 5) drawBox(n.level, n.start, n.aId, n.bId, n.winnerId);
 
-  // champion ribbon under the final (wide enough for the flag + a long name)
-  const fin = rectOf(5, 0);
-  const cx = fin.x + BOXW / 2;
-  const ribbonW = COLW * 1.9;
-  const cyChamp = fin.cy + BOXH / 2 + 56;
-  roundRect(x, cx - ribbonW / 2, cyChamp - 36, ribbonW, 72, 14);
+  // champion card — the visual center the whole bracket converges into
+  const runnerId = d.nodes
+    .filter((n) => n.level === 4)
+    .map((n) => n.winnerId)
+    .find((w) => w !== d.championId);
+  roundRect(x, champL, champCy - champH / 2, champW, champH, 16);
   x.fillStyle = "rgba(216,168,56,0.12)";
   x.fill();
-  x.strokeStyle = "rgba(216,168,56,0.5)";
-  x.lineWidth = 2;
+  x.strokeStyle = "rgba(216,168,56,0.55)";
+  x.lineWidth = 2.5;
   x.stroke();
   x.textAlign = "center";
   x.fillStyle = GOLD;
-  x.font = `700 12px ${SANS}`;
-  x.fillText("🏆 CHAMPION", cx, cyChamp - 16);
-  // name: shrink to fit the ribbon, truncate only as a last resort (handles long names + a real flag)
+  x.font = `700 13px ${SANS}`;
+  x.fillText("🏆 CHAMPION", champCx, champCy - 40);
+  // name: shrink to fit, truncate only as a last resort (handles long names + a real flag)
   const champLabel = `${flag(d.championId)}  ${name(d.championId)}`;
-  const maxW = ribbonW - 48;
-  let fs = 24;
+  const maxW = champW - 26;
+  let fs = 26;
   x.fillStyle = WHITE;
-  do { x.font = `700 ${fs}px ${SANS}`; } while (x.measureText(champLabel).width > maxW && --fs > 15);
-  x.fillText(trunc(x, champLabel, maxW), cx, cyChamp + 14);
+  do { x.font = `700 ${fs}px ${SANS}`; } while (x.measureText(champLabel).width > maxW && --fs > 14);
+  x.fillText(trunc(x, champLabel, maxW), champCx, champCy + 6);
+  if (runnerId !== undefined) {
+    x.fillStyle = MUTE;
+    x.font = `400 14px ${SANS}`;
+    x.fillText(trunc(x, `def. ${flag(runnerId)} ${name(runnerId)}`, champW - 22), champCx, champCy + 40);
+  }
 
   // footer url
   x.textAlign = "right";
