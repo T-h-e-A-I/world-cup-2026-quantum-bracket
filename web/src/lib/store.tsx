@@ -14,6 +14,15 @@ import type { Results } from "./types";
 const STORAGE_KEY = "wc26-results-v3";
 const official = OFFICIAL as Results; // real completed matches the repo maintains
 
+// Chalk/Chaos pools depend only on the official baseline (constant per deploy), so
+// compute each once and cache. Repeat taps are then instant — important on weak phones.
+let chalkPool: Results[] | null = null;
+let chaosPool: Results[] | null = null;
+const getChalkPool = () => (chalkPool ??= topRealities(official, 50).map((r) => r.winners));
+const getChaosPool = () => (chaosPool ??= chaosRealities(official, 50).map((r) => r.winners));
+const pickFrom = (pool: Results[]): Results =>
+  pool.length ? pool[Math.floor(Math.random() * pool.length)] : randomBracket(official);
+
 interface Ctx {
   results: Results;   // official + your picks — drives EVERY page (the live collapse)
   W: number[][];
@@ -91,14 +100,11 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
     });
   }, []);
 
-  // Chalk draws a random bracket from the 50 most probable, Chaos from the 50 most
-  // chaotic — so every tap is a different (but still chalky / cursed) world.
-  const pick = (pool: { winners: Results }[]) =>
-    pool.length ? pool[Math.floor(Math.random() * pool.length)].winners : randomBracket(official);
-
+  // Chalk draws a random bracket from the most probable pool, Chaos from the most
+  // cursed pool — every tap is a different world, and the pools are cached (see above).
   const randomize = useCallback(() => setOverlay(randomBracket(official)), []);
-  const chalk = useCallback(() => setOverlay(pick(topRealities(official, 50))), []);
-  const chaos = useCallback(() => setOverlay(pick(chaosRealities(official, 50))), []);
+  const chalk = useCallback(() => setOverlay(pickFrom(getChalkPool())), []);
+  const chaos = useCallback(() => setOverlay(pickFrom(getChaosPool())), []);
   const reset = useCallback(() => setOverlay({}), []);
 
   const shareUrl = useCallback(() => {

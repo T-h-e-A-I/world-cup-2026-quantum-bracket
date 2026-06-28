@@ -197,8 +197,17 @@ function toReality(o: SubOutcome): Reality {
   };
 }
 
+// Per-champion cap on the DP. Keeping the top-K per champion-of-a-subtree is what
+// guarantees the global top-K, but cost grows ~quadratically in the cap (the final
+// node sorts cap²·256 candidates). A cap of 8 is near-instant and still yields a rich,
+// near-exact ranking — far more than enough for a display list or a random-pick pool.
+const PER_WINNER_CAP = 8;
+
 export function topRealities(results: Results, n = 10): Reality[] {
-  return subOutcomes(L_MAX, 0, results, n).map(toReality).sort((a, b) => b.p - a.p).slice(0, n);
+  return subOutcomes(L_MAX, 0, results, Math.min(n, PER_WINNER_CAP))
+    .map(toReality)
+    .sort((a, b) => b.p - a.p)
+    .slice(0, n);
 }
 
 /** A pool of strong candidate brackets (up to `capPerChampion` per possible champion). */
