@@ -185,17 +185,29 @@ export function drawBracketCard(x: CanvasRenderingContext2D, d: BracketCard): vo
   x.strokeStyle = "rgba(216,168,56,0.5)";
   x.lineWidth = 2;
   x.stroke();
-  x.textAlign = "center";
+  // NB: canvas mis-measures flag-emoji width, so centering a "flag + name" string
+  // anchors it off-center. Instead we center the *text* and place the emoji to its
+  // left using textAlign:"right" — keeping the label/name visually centered.
   x.fillStyle = GOLD;
   x.font = `700 12px ${SANS}`;
-  x.fillText("🏆 CHAMPION", cx, cyChamp - 16);
-  // name: shrink to fit the ribbon, truncate only as a last resort (handles long names + a real flag)
-  const champLabel = `${flag(d.championId)}  ${name(d.championId)}`;
-  const maxW = ribbonW - 48;
+  x.textAlign = "center";
+  x.fillText("CHAMPION", cx, cyChamp - 16);
+  x.textAlign = "right";
+  x.fillText("🏆", cx - x.measureText("CHAMPION").width / 2 - 4, cyChamp - 16);
+
+  // champion name: shrink to fit, centered; flag sits just to its left
+  const champName = name(d.championId);
+  const maxW = ribbonW - 90; // leave room for the flag + padding on the left
   let fs = 24;
+  do { x.font = `700 ${fs}px ${SANS}`; } while (x.measureText(champName).width > maxW && --fs > 15);
+  const nm = trunc(x, champName, maxW);
   x.fillStyle = WHITE;
-  do { x.font = `700 ${fs}px ${SANS}`; } while (x.measureText(champLabel).width > maxW && --fs > 15);
-  x.fillText(trunc(x, champLabel, maxW), cx, cyChamp + 14);
+  x.textAlign = "center";
+  x.fillText(nm, cx, cyChamp + 14);
+  const nameLeft = cx - x.measureText(nm).width / 2;
+  x.font = `${fs - 2}px ${SANS}`;
+  x.textAlign = "right";
+  x.fillText(flag(d.championId), nameLeft - 10, cyChamp + 14);
 
   // footer url
   x.textAlign = "right";
