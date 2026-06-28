@@ -29,7 +29,7 @@ function MatchCard({ node }: { node: MatchNode }) {
   const b = slot(node, 1, results, W);
   const playable = a.decided && b.decided;
   const winner = results[node.id];
-  const sc = playable ? pred(a.id, b.id).score : null;
+  const pr = pred(a.id, b.id); // goal prediction for the expected matchup (every round)
 
   const Row = ({ s }: { s: Slot }) => {
     const isWin = winner === s.id;
@@ -66,7 +66,12 @@ function MatchCard({ node }: { node: MatchNode }) {
     >
       <div className="flex items-center justify-between px-1 pb-0.5 text-[9px] uppercase tracking-wider text-faint">
         <span>{node.no ? `Match ${node.no}` : node.round}</span>
-        {sc && <span className="tabular">{sc[0]}–{sc[1]}</span>}
+        <span
+          className="tabular"
+          title={`Predicted result for the expected matchup · ${Math.round(pr.scoreProb * 100)}% likely scoreline`}
+        >
+          {pr.score[0]}–{pr.score[1]}
+        </span>
       </div>
       <Row s={a} />
       <Row s={b} />
@@ -146,10 +151,15 @@ export default function Bracket() {
         </button>
       </div>
 
-      <p className="mb-4 text-sm text-mute">
+      <p className="mb-3 text-sm text-mute">
         <span className="text-ink">Tap a team to advance it.</span> Greyed italic names show who’s
         most likely to get there — they update as you fill in the earlier rounds.
       </p>
+      <div className="mb-4 flex flex-wrap gap-x-5 gap-y-1.5 text-[11px] text-faint">
+        <span><b className="tabular text-mute">2–1</b> = predicted score (hover for how likely)</span>
+        <span><i className="text-mute">Brazil</i> <span className="tabular">61%</span> = chance to reach this match</span>
+        <span><span className="tabular font-semibold text-quantum">72%</span> on a ✓ winner = model’s chance it won that game</span>
+      </div>
 
       <div className="overflow-x-auto pb-4">
         <div className="flex min-w-[1180px] items-stretch gap-2">

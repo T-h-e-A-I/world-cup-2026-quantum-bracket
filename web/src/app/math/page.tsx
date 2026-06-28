@@ -23,6 +23,39 @@ export default function MathPage() {
         </p>
       </header>
 
+      <section className="card p-5">
+        <h2 className="mb-1 text-lg font-bold">What every number means</h2>
+        <p className="mb-4 text-sm text-mute">
+          Two different kinds of percentage show up around the site — here’s the difference.
+        </p>
+        <dl className="space-y-3.5 text-sm">
+          <Term t="Reach probability" eg="“Argentina 79.7% to reach the semifinal”">
+            The chance a team <strong>gets to</strong> a round, adding up every path that takes it
+            there. On the bracket, this is the greyed italic % next to a team that hasn’t arrived yet.
+          </Term>
+          <Term t="Win chance, if they meet" eg="“France 72%” — the green % on a ✓ winner">
+            The chance one team <strong>beats the other in a single game</strong>, if that game
+            happens. On the bracket it’s the green % shown on a winner you’ve picked.
+          </Term>
+          <Term t="“% likely” badge" eg="“71% likely”">
+            The model’s chance that the <strong>predicted result</strong> actually happens — just the
+            favoured team’s win chance, in plain words.
+          </Term>
+          <Term t="Predicted score + its %" eg="“1–1 · 13%”">
+            The single most likely <strong>exact scoreline</strong>, and how likely that exact score
+            is. These stay small — football is low-scoring, so even the best guess at the exact score
+            rarely clears ~15%.
+          </Term>
+          <Term t="Champion / final %" eg="“34.6% to win it all”">
+            The chance a team wins the whole tournament, or reaches the final — across every route.
+          </Term>
+          <Term t="Scenario odds · “1 in N”" eg="“1 in 35,780”">
+            How likely a whole <strong>complete bracket</strong> (or your current run of picks) is —
+            the product of every game in it.
+          </Term>
+        </dl>
+      </section>
+
       <Section n="1" title="Team strength → Elo">
         <p>
           Each team carries a World-Football-Elo rating. The expected result of a neutral match
@@ -105,6 +138,17 @@ export default function MathPage() {
         </p>
       </Section>
     </article>
+  );
+}
+
+function Term({ t, eg, children }: { t: string; eg: string; children: React.ReactNode }) {
+  return (
+    <div className="border-l-2 border-line pl-3">
+      <dt className="font-semibold text-ink">
+        {t} <span className="font-normal text-faint">— {eg}</span>
+      </dt>
+      <dd className="mt-0.5 text-mute [&_strong]:font-semibold [&_strong]:text-ink">{children}</dd>
+    </div>
   );
 }
 

@@ -80,8 +80,8 @@ export default function TeamPage() {
                   <span className="text-mute">vs</span>
                   <TeamChip id={st.opp} className="font-semibold" />
                 </div>
-                <div className="mt-2.5 flex items-center gap-2 text-xs">
-                  <Score a={p.score[0]} b={p.score[1]} />
+                <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
+                  <Score a={p.score[0]} b={p.score[1]} prob={p.scoreProb} />
                   <Confidence label={p.confidenceLabel} value={p.confidence} />
                 </div>
                 <div className="mt-2 text-[11px] text-faint">
@@ -121,7 +121,7 @@ export default function TeamPage() {
                       </div>
                     </td>
                     <td className="py-2.5"><Pct p={f.pWin} className="font-semibold text-champ" /></td>
-                    <td className="py-2.5"><Score a={p.score[0]} b={p.score[1]} /></td>
+                    <td className="py-2.5"><Score a={p.score[0]} b={p.score[1]} prob={p.scoreProb} /></td>
                     <td className="py-2.5"><Confidence label={p.confidenceLabel} value={p.confidence} /></td>
                   </tr>
                 );

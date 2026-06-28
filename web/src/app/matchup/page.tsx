@@ -54,6 +54,9 @@ export default function MatchupPage() {
             <Flag id={b} className="h-6 w-9 rounded object-cover ring-1 ring-black/10" />
           </span>
         </div>
+        <div className="mt-2 text-xs text-faint">
+          predicted scoreline · {Math.round(pr.scoreProb * 100)}% likely
+        </div>
         <div className="mt-3 flex items-center justify-center gap-3 text-sm">
           <Confidence label={pr.confidenceLabel} value={pr.confidence} />
           <span className="text-mute">edge <span className="text-ink">{favA ? tname(a) : tname(b)}</span></span>

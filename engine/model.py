@@ -60,6 +60,7 @@ def match(elo_i, elo_j):
     return {
         "advance": advance,
         "score": list(best_score),            # most likely exact scoreline
+        "score_prob": round(best_p / total, 4),  # P(exactly this scoreline)
         "xg": [round(lam_i, 2), round(lam_j, 2)],
         "confidence": round(decisiveness * 100),
         "confidence_label": _label(decisiveness),

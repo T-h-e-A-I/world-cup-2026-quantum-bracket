@@ -20,6 +20,7 @@ export function pred(i: number, j: number): Pred {
   if (!flip) return p;
   return {
     score: [p.score[1], p.score[0]],
+    scoreProb: p.scoreProb,
     xg: [p.xg[1], p.xg[0]],
     confidence: p.confidence,
     confidenceLabel: p.confidenceLabel,

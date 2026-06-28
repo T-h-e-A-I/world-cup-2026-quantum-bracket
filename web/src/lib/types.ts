@@ -22,6 +22,7 @@ export interface MatchNode {
 
 export interface Pred {
   score: [number, number];
+  scoreProb: number; // P(exactly this scoreline)
   xg: [number, number];
   confidence: number;
   confidenceLabel: string;

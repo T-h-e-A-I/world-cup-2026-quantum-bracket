@@ -33,8 +33,8 @@ def build():
     for i in range(N):
         for j in range(i + 1, N):
             m = match(elos[i], elos[j])
-            pairs[f"{i}_{j}"] = {"score": m["score"], "xg": m["xg"],
-                                 "confidence": m["confidence"],
+            pairs[f"{i}_{j}"] = {"score": m["score"], "scoreProb": m["score_prob"],
+                                 "xg": m["xg"], "confidence": m["confidence"],
                                  "confidenceLabel": m["confidence_label"]}
 
     data = {

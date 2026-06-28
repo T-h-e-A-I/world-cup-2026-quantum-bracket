@@ -40,10 +40,17 @@ export function Confidence({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function Score({ a, b }: { a: number; b: number }) {
+export function Score({ a, b, prob }: { a: number; b: number; prob?: number }) {
   return (
-    <span className="tabular rounded-md border border-line bg-white/5 px-1.5 py-0.5 font-semibold">
-      {a}–{b}
+    <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
+      <span className="tabular rounded-md border border-line bg-void2 px-1.5 py-0.5 font-semibold">
+        {a}–{b}
+      </span>
+      {prob !== undefined && (
+        <span className="tabular text-[11px] text-faint" title="How likely this exact scoreline is">
+          {Math.round(prob * 100)}%
+        </span>
+      )}
     </span>
   );
 }
