@@ -63,6 +63,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${inter.variable} ${space.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
+        <link rel="preconnect" href="https://flagcdn.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://flagcdn.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}

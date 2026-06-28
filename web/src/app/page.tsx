@@ -118,7 +118,7 @@ export default function Home() {
       <section className="overflow-hidden rounded-3xl border border-line bg-ink text-white">
         <div className="grid items-center gap-0 sm:grid-cols-[1fr_1.1fr]">
           <div className="relative aspect-[16/10] w-full sm:aspect-auto sm:h-full sm:min-h-[260px]">
-            <Image src="/image.png" alt="Doctor Strange viewing the futures" fill className="object-cover" sizes="(max-width: 640px) 100vw, 50vw" />
+            <Image src="/strange.webp" alt="Doctor Strange viewing the futures" fill className="object-cover" sizes="(max-width: 640px) 100vw, 50vw" />
           </div>
           <div className="p-6 sm:p-8">
             <div className="text-[11px] uppercase tracking-widest text-white/50">

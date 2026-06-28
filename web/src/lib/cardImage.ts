@@ -174,10 +174,10 @@ export function drawBracketCard(x: CanvasRenderingContext2D, d: BracketCard): vo
   // every match (R32 .. Final)
   for (const n of d.nodes) drawBox(n.level, n.start, n.aId, n.bId, n.winnerId);
 
-  // champion ribbon under the final (wider than a match box so the flag + name fit)
+  // champion ribbon under the final (wide enough for the flag + a long name)
   const fin = rectOf(5, 0);
   const cx = fin.x + BOXW / 2;
-  const ribbonW = COLW * 1.7;
+  const ribbonW = COLW * 1.9;
   const cyChamp = fin.cy + BOXH / 2 + 56;
   roundRect(x, cx - ribbonW / 2, cyChamp - 36, ribbonW, 72, 14);
   x.fillStyle = "rgba(216,168,56,0.12)";
@@ -189,9 +189,13 @@ export function drawBracketCard(x: CanvasRenderingContext2D, d: BracketCard): vo
   x.fillStyle = GOLD;
   x.font = `700 12px ${SANS}`;
   x.fillText("🏆 CHAMPION", cx, cyChamp - 16);
+  // name: shrink to fit the ribbon, truncate only as a last resort (handles long names + a real flag)
+  const champLabel = `${flag(d.championId)}  ${name(d.championId)}`;
+  const maxW = ribbonW - 48;
+  let fs = 24;
   x.fillStyle = WHITE;
-  x.font = `700 24px ${SANS}`;
-  x.fillText(trunc(x, `${flag(d.championId)}  ${name(d.championId)}`, ribbonW - 44), cx, cyChamp + 14);
+  do { x.font = `700 ${fs}px ${SANS}`; } while (x.measureText(champLabel).width > maxW && --fs > 15);
+  x.fillText(trunc(x, champLabel, maxW), cx, cyChamp + 14);
 
   // footer url
   x.textAlign = "right";

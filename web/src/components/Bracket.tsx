@@ -66,7 +66,7 @@ function MatchCard({ node }: { node: MatchNode }) {
 
   return (
     <div
-      className={`card w-[136px] shrink-0 p-1 ${winner !== undefined ? "border-quantum/40" : ""}
+      className={`card w-[136px] xl:w-[112px] shrink-0 p-1 ${winner !== undefined ? "border-quantum/40" : ""}
         ${playable && winner === undefined ? "ring-1 ring-flux/30" : ""}`}
     >
       <div className="flex items-center justify-between px-1 pb-0.5 text-[9px] uppercase tracking-wider text-faint">
@@ -226,7 +226,7 @@ export default function Bracket() {
       </p>
 
       <div className="overflow-x-auto pb-4">
-        <div className="flex min-w-[1180px] items-stretch gap-2">
+        <div className="flex min-w-[1180px] items-stretch gap-2 xl:min-w-0 xl:gap-1">
           <Column label="R32" nodes={byLevel(1, 0)} />
           <Column label="R16" nodes={byLevel(2, 0)} />
           <Column label="QF" nodes={byLevel(3, 0)} />
