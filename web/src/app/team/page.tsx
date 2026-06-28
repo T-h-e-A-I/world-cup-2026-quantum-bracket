@@ -1,22 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTournament } from "@/lib/store";
-import { reach, modalPath, finalOpponents } from "@/lib/engine";
+import { reach, modalPath, finalOpponents, realityPool } from "@/lib/engine";
 import { tname, pct, pred } from "@/lib/model";
 import { TeamChip, Bar, Pct, Score, Confidence } from "@/components/ui";
 import { Flag } from "@/components/Flag";
+import { RealityList } from "@/components/RealityList";
+import { Info } from "@/components/Info";
 import TeamSelect from "@/components/TeamSelect";
 import ShareBar from "@/components/ShareBar";
 
 const ROUND_LABELS = ["Round of 16", "Quarterfinal", "Semifinal", "Final", "Champion"];
 
 export default function TeamPage() {
-  const { W } = useTournament();
+  const { W, results } = useTournament();
   const [id, setId] = useState(24); // Argentina
   const r = reach(W, id);
   const path = modalPath(W, id);
   const finals = finalOpponents(W, id);
+  const pool = useMemo(() => realityPool(results, 8), [results]);
+  const worlds = pool.filter((x) => x.champion === id).slice(0, 5);
 
   const steps = [
     { label: "Reach Round of 16", p: r.r16 },
@@ -28,13 +32,13 @@ export default function TeamPage() {
 
   return (
     <div className="space-y-12">
-      <header>
-        <h1 className="text-3xl font-bold sm:text-4xl">My team’s odds</h1>
-        <p className="mt-1 text-sm text-mute">
-          64 routes to the final × 16 possible opponents = <span className="text-ink">1,024</span>{" "}
-          final scenarios — all exact.
-        </p>
-      </header>
+      <h1 className="flex items-center gap-2 text-3xl font-bold sm:text-4xl">
+        My team’s odds
+        <Info align="left">
+          64 routes to the final × 16 possible opponents = 1,024 final scenarios, all computed
+          exactly.
+        </Info>
+      </h1>
 
       {/* selector + reach */}
       <section>
@@ -91,6 +95,14 @@ export default function TeamPage() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* most likely worlds where this team wins */}
+      <section>
+        <H2 hint="tap to open in Play Bracket">Most likely worlds where {tname(id)} win</H2>
+        <div className="mt-2">
+          <RealityList items={worlds} empty={`${tname(id)} winning it all is too unlikely to surface a bracket.`} />
         </div>
       </section>
 

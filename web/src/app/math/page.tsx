@@ -58,9 +58,13 @@ export default function MathPage() {
 
       <Section n="1" title="Team strength → Elo">
         <p>
-          Each team carries a World-Football-Elo rating. The expected result of a neutral match
-          between <K>i</K> and <K>j</K> follows the standard Elo curve, driven only by the rating
-          gap <K>d = Eᵢ − Eⱼ</K>.
+          Each team carries a rating from the{" "}
+          <a href="https://www.eloratings.net" target="_blank" rel="noopener noreferrer" className="text-quantum underline">
+            World Football Elo
+          </a>{" "}
+          system (eloratings.net). The expected result of a neutral match between <K>i</K> and{" "}
+          <K>j</K> follows the standard Elo curve, driven only by the rating gap <K>d = Eᵢ − Eⱼ</K>.
+          Values here are approximate and easy to retune.
         </p>
       </Section>
 

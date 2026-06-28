@@ -8,6 +8,7 @@ import { topRealities } from "@/lib/engine";
 import { MODEL, pct, tname, big, pred } from "@/lib/model";
 import { TeamChip, Bar, Pct, Score } from "@/components/ui";
 import { Flag } from "@/components/Flag";
+import { Info } from "@/components/Info";
 import ShareBar from "@/components/ShareBar";
 
 const STRANGE_FUTURES = 14000605; // Doctor Strange's count
@@ -133,7 +134,13 @@ export default function Home() {
       {/* most probable realities */}
       <section>
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-2">
-          <h2 className="text-xl font-bold">Most probable realities</h2>
+          <h2 className="flex items-center gap-1.5 text-xl font-bold">
+            Most probable realities
+            <Info>
+              A “reality” is one complete bracket — all 31 results. Even the likeliest is a long
+              shot; no single bracket owns the future. Tap one to open it in Play Bracket.
+            </Info>
+          </h2>
           <div className="flex items-center gap-1 text-xs">
             <span className="mr-1 text-faint">show top</span>
             {SHOW_OPTIONS.map((n) => (
@@ -149,12 +156,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <p className="mb-1 mt-2 max-w-2xl text-sm text-mute">
-          A “reality” is one complete bracket — all 31 results. Even the likeliest is a{" "}
-          <span className="text-ink">long shot</span>: no single bracket owns the future. Tap one to
-          open it.
-        </p>
-        <ol className="rows">
+        <ol className="mt-2 rows">
           {realities.slice(0, shown).map((r, i) => {
             const runnerUp = r.finalists[0] === r.champion ? r.finalists[1] : r.finalists[0];
             const href = `/bracket?r=${encodeURIComponent(JSON.stringify(r.winners))}`;
@@ -168,7 +170,7 @@ export default function Home() {
                   <TeamChip id={runnerUp} className="hidden w-32 text-mute sm:flex sm:w-40" />
                   <div className="ml-auto flex items-center gap-3">
                     <div className="hidden w-24 sm:block"><Bar p={r.p / topRealityP} /></div>
-                    <span className="tabular w-20 text-right font-semibold">{oneIn(r.p)}</span>
+                    <span className="tabular whitespace-nowrap text-right font-semibold">{oneIn(r.p)}</span>
                     <span className="text-faint">→</span>
                   </div>
                 </a>

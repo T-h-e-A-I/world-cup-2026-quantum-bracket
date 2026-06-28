@@ -178,16 +178,31 @@ function subOutcomes(level: number, start: number, results: Results, n: number):
   return out;
 }
 
+function toReality(o: SubOutcome): Reality {
+  return {
+    champion: o.winner,
+    finalists: [o.winners["L4-0"], o.winners["L4-16"]] as [number, number],
+    p: o.p,
+    winners: o.winners,
+  };
+}
+
 export function topRealities(results: Results, n = 10): Reality[] {
-  return subOutcomes(L_MAX, 0, results, n)
-    .sort((a, b) => b.p - a.p)
-    .slice(0, n)
-    .map((o) => ({
-      champion: o.winner,
-      finalists: [o.winners["L4-0"], o.winners["L4-16"]] as [number, number],
-      p: o.p,
-      winners: o.winners,
-    }));
+  return subOutcomes(L_MAX, 0, results, n).map(toReality).sort((a, b) => b.p - a.p).slice(0, n);
+}
+
+/** A pool of strong candidate brackets (up to `capPerChampion` per possible champion). */
+export function realityPool(results: Results, capPerChampion = 10): Reality[] {
+  return subOutcomes(L_MAX, 0, results, capPerChampion).map(toReality).sort((a, b) => b.p - a.p);
+}
+
+/** Does this complete bracket have i and j actually playing each other? */
+export function meetInBracket(winners: Results, i: number, j: number): boolean {
+  const L = meetLevel(i, j);
+  if (L === 1) return true; // adjacent teams always play their Round of 32 game
+  const aNode = `L${L - 1}-${(i >> (L - 1)) << (L - 1)}`;
+  const bNode = `L${L - 1}-${(j >> (L - 1)) << (L - 1)}`;
+  return winners[aNode] === i && winners[bNode] === j;
 }
 
 /** Favorite team to emerge from a subtree, with its probability (for ghost slots). */

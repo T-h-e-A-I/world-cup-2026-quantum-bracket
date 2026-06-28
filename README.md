@@ -100,6 +100,12 @@ Edit Elo ratings in [`engine/bracket.py`](engine/bracket.py) and re-run
 `python3 build_data.py`. Model parameters (goals-per-Elo, baseline goals) live in
 [`engine/model.py`](engine/model.py).
 
+## Credits
+
+- Team strength: the [World Football Elo](https://www.eloratings.net) rating system
+  (eloratings.net). Ratings here are approximate and editable; not affiliated with FIFA.
+- Goals: an Elo-driven Poisson model (Dixon-Coles-style supremacy split).
+
 ---
 
 MIT © Awesh Islam · built in public 🌌

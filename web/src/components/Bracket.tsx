@@ -5,6 +5,7 @@ import { MODEL, useTournament } from "@/lib/store";
 import { favoriteIn, scenarioProbability } from "@/lib/engine";
 import { tname, pred, pct, adv } from "@/lib/model";
 import { Flag } from "./Flag";
+import { Info } from "./Info";
 import type { MatchNode, Results } from "@/lib/types";
 
 const byLevel = (lvl: number, half?: 0 | 1) =>
@@ -151,15 +152,18 @@ export default function Bracket() {
         </button>
       </div>
 
-      <p className="mb-3 text-sm text-mute">
-        <span className="text-ink">Tap a team to advance it.</span> Greyed italic names show who’s
-        most likely to get there — they update as you fill in the earlier rounds.
+      <p className="mb-4 flex items-center gap-1.5 text-sm text-mute">
+        <span className="text-ink">Tap a team to advance it.</span>
+        <Info align="left">
+          <span className="block">Picks collapse the whole site — every page updates to this scenario; reset from the top bar.</span>
+          <span className="mt-2 block">
+            <b className="tabular text-mute">2–1</b> = predicted score ·{" "}
+            <i className="text-mute">Brazil</i> <span className="tabular">61%</span> = chance to reach
+            this match · <span className="tabular font-semibold text-quantum">72%</span> on a ✓ winner
+            = model’s chance it won that game.
+          </span>
+        </Info>
       </p>
-      <div className="mb-4 flex flex-wrap gap-x-5 gap-y-1.5 text-[11px] text-faint">
-        <span><b className="tabular text-mute">2–1</b> = predicted score (hover for how likely)</span>
-        <span><i className="text-mute">Brazil</i> <span className="tabular">61%</span> = chance to reach this match</span>
-        <span><span className="tabular font-semibold text-quantum">72%</span> on a ✓ winner = model’s chance it won that game</span>
-      </div>
 
       <div className="overflow-x-auto pb-4">
         <div className="flex min-w-[1180px] items-stretch gap-2">

@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTournament } from "@/lib/store";
-import { probMeet, meetLevel } from "@/lib/engine";
+import { probMeet, meetLevel, realityPool, meetInBracket } from "@/lib/engine";
 import { ROUNDS, tname, pct, pred } from "@/lib/model";
 import { Bar, Pct, Score, Confidence } from "@/components/ui";
 import { Flag } from "@/components/Flag";
+import { RealityList } from "@/components/RealityList";
+import { Info } from "@/components/Info";
 import TeamSelect from "@/components/TeamSelect";
 import ShareBar from "@/components/ShareBar";
 
 export default function MatchupPage() {
-  const { W } = useTournament();
+  const { W, results } = useTournament();
   const [a, setA] = useState(2); // France
   const [b, setB] = useState(24); // Argentina
 
@@ -21,16 +23,15 @@ export default function MatchupPage() {
   const reachA = W[a][level - 1];
   const reachB = W[b][level - 1];
   const favA = pr.score[0] >= pr.score[1];
+  const pool = useMemo(() => realityPool(results, 10), [results]);
+  const meetWorlds = pool.filter((r) => meetInBracket(r.winners, a, b)).slice(0, 5);
 
   return (
     <div className="space-y-10">
-      <header>
-        <h1 className="text-3xl font-bold sm:text-4xl">Will they meet?</h1>
-        <p className="mt-1 text-sm text-mute">
-          Because the bracket is fixed, any two teams can collide in exactly{" "}
-          <span className="text-ink">one</span> round.
-        </p>
-      </header>
+      <h1 className="flex items-center gap-2 text-3xl font-bold sm:text-4xl">
+        Will they meet?
+        <Info align="left">Because the bracket is fixed, any two teams can collide in exactly one round.</Info>
+      </h1>
 
       <div className="grid items-end gap-4 sm:grid-cols-[1fr_auto_1fr]">
         <TeamSelect value={a} onChange={setA} exclude={b} label="Team A" />
@@ -64,7 +65,13 @@ export default function MatchupPage() {
 
         <div className="mx-auto mt-6 max-w-md">
           <div className="mb-1 flex items-center justify-between text-sm">
-            <span className="text-mute">Probability they actually meet</span>
+            <span className="flex items-center gap-1.5 text-mute">
+              Probability they actually meet
+              <Info align="left">
+                P(meet) = P({tname(a)} reaches {round}) × P({tname(b)} reaches {round}) ={" "}
+                {pct(reachA)} × {pct(reachB)} = {pct(p)}.
+              </Info>
+            </span>
             <Pct p={p} className="font-bold text-quantum" />
           </div>
           <Bar p={p} />
@@ -76,10 +83,18 @@ export default function MatchupPage() {
         <ReachCard id={b} round={round} p={reachB} />
       </div>
 
-      <p className="text-center text-xs text-faint">
-        P(meet) = P({tname(a)} reaches {round}) × P({tname(b)} reaches {round}) = {pct(reachA)} ×{" "}
-        {pct(reachB)} = <span className="text-mute">{pct(p)}</span>
-      </p>
+      <section>
+        <div className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
+          <h2 className="text-xl font-bold">Most likely worlds where they meet</h2>
+          <span className="hidden text-xs text-faint sm:inline">tap to open in Play Bracket</span>
+        </div>
+        <div className="mt-2">
+          <RealityList
+            items={meetWorlds}
+            empty={`A bracket where ${tname(a)} and ${tname(b)} both get to the ${round} is too unlikely to surface.`}
+          />
+        </div>
+      </section>
 
       <ShareBar text={`Can ${tname(a)} and ${tname(b)} meet at the 2026 World Cup? Only in the ${round} — ${pct(p)} chance`} />
     </div>
