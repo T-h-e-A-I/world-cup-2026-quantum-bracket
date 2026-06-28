@@ -123,7 +123,7 @@ function ChampionCore() {
 }
 
 export default function Bracket() {
-  const { home, results, exploring, reset } = useTournament();
+  const { home, results, exploring, randomize, reset } = useTournament();
   const sp = scenarioProbability(results);
 
   return (
@@ -144,11 +144,18 @@ export default function Bracket() {
           </div>
         )}
         <button
+          onClick={randomize}
+          title="Simulate one tournament — a model-weighted random complete bracket"
+          className="ml-auto chip px-3 py-1.5 text-sm font-medium hover:bg-void2"
+        >
+          🎲 Random
+        </button>
+        <button
           onClick={reset}
           disabled={!exploring}
-          className="ml-auto chip px-3 py-1.5 text-sm text-mute enabled:hover:text-ink disabled:opacity-40"
+          className="chip px-3 py-1.5 text-sm text-mute enabled:hover:text-ink disabled:opacity-40"
         >
-          ↺ Reset bracket
+          ↺ Reset
         </button>
       </div>
 

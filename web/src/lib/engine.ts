@@ -214,6 +214,17 @@ export function favoriteIn(W: number[][], start: number, level: number): { id: n
   return { id, p: best };
 }
 
+/** Simulate one full tournament: fill every match with a model-weighted random winner. */
+export function randomBracket(base: Results = {}): Results {
+  const out: Results = {};
+  for (const m of MODEL.matches) {
+    const a = m.teams ? m.teams[0] : out[m.feeders![0]];
+    const b = m.teams ? m.teams[1] : out[m.feeders![1]];
+    out[m.id] = base[m.id] !== undefined ? base[m.id] : Math.random() < adv(a, b) ? a : b;
+  }
+  return out;
+}
+
 /** Probability of the picks made so far = product of each decided match's model odds. */
 export function scenarioProbability(results: Results): number {
   let p = 1;

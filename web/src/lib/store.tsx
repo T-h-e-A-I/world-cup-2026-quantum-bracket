@@ -4,7 +4,7 @@ import {
   createContext, useContext, useEffect, useMemo, useState, useCallback,
 } from "react";
 import { MODEL } from "./model";
-import { winsubTable, homeView, type Home } from "./engine";
+import { winsubTable, homeView, randomBracket, type Home } from "./engine";
 import { encodeResults, decodeResults } from "./share";
 import OFFICIAL from "@/data/results.json";
 import type { Results } from "./types";
@@ -20,6 +20,7 @@ interface Ctx {
   exploring: boolean; // you have added picks beyond the official results
   setResult: (nodeId: string, winner: number) => void;
   clearResult: (nodeId: string) => void;
+  randomize: () => void; // draw one model-weighted random complete bracket
   reset: () => void;
   shareUrl: () => string;
 }
@@ -86,6 +87,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
     });
   }, []);
 
+  const randomize = useCallback(() => setOverlay(randomBracket(official)), []);
   const reset = useCallback(() => setOverlay({}), []);
 
   const shareUrl = useCallback(() => {
@@ -99,7 +101,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
   const value: Ctx = {
     results, W, home, decided: home.decided,
     exploring: Object.keys(overlay).length > 0,
-    setResult, clearResult, reset, shareUrl,
+    setResult, clearResult, randomize, reset, shareUrl,
   };
   return <TournamentCtx.Provider value={value}>{children}</TournamentCtx.Provider>;
 }
