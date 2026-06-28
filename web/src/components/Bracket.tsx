@@ -29,7 +29,7 @@ function slot(node: MatchNode, side: 0 | 1, results: Results, W: number[][]): Sl
 }
 
 function MatchCard({ node }: { node: MatchNode }) {
-  const { results, W, setResult, clearResult } = useTournament();
+  const { results, W, setResult, clearResult, animating } = useTournament();
   const a = slot(node, 0, results, W);
   const b = slot(node, 1, results, W);
   const playable = a.decided && b.decided;
@@ -48,6 +48,7 @@ function MatchCard({ node }: { node: MatchNode }) {
         title={playable ? `Pick ${tname(s.id)} to advance` : "Decide the feeding matches first"}
         className={`group flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-[12px] transition
           ${isWin ? "bg-quantum/25 ring-1 ring-quantum/50" : ""}
+          ${isWin && animating ? "collapse-pop" : ""}
           ${isLose ? "opacity-35 line-through" : ""}
           ${playable && !isWin ? "hover:bg-white/10 cursor-pointer" : ""}
           ${!playable ? "cursor-default" : ""}`}
@@ -127,7 +128,7 @@ function ChampionCore() {
 }
 
 export default function Bracket() {
-  const { W, home, results, exploring, randomize, chalk, chaos, reset } = useTournament();
+  const { W, home, results, exploring, randomize, chalk, chaos, reset, animating } = useTournament();
   const sp = scenarioProbability(results);
   const complete = home.decided === 31;
   const oneIn = Math.round(1 / sp);
@@ -181,28 +182,31 @@ export default function Bracket() {
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <button
             onClick={randomize}
+            disabled={animating}
             title="Simulate one tournament — a model-weighted random complete bracket"
-            className="chip px-3 py-1.5 text-sm font-medium hover:bg-void2"
+            className="chip px-3 py-1.5 text-sm font-medium hover:bg-void2 disabled:opacity-40"
           >
             🎲 Random
           </button>
           <button
             onClick={chalk}
+            disabled={animating}
             title="Chalk — the favorite advances in every match (the single likeliest bracket)"
-            className="chip px-3 py-1.5 text-sm font-medium hover:bg-void2"
+            className="chip px-3 py-1.5 text-sm font-medium hover:bg-void2 disabled:opacity-40"
           >
             ✓ Chalk
           </button>
           <button
             onClick={chaos}
+            disabled={animating}
             title="Chaos — the underdog wins every match (the most cursed possible bracket)"
-            className="chip px-3 py-1.5 text-sm font-medium hover:bg-void2"
+            className="chip px-3 py-1.5 text-sm font-medium hover:bg-void2 disabled:opacity-40"
           >
             🔥 Chaos
           </button>
           <button
             onClick={reset}
-            disabled={!exploring}
+            disabled={!exploring && !animating}
             className="chip px-3 py-1.5 text-sm text-mute enabled:hover:text-ink disabled:opacity-40"
           >
             ↺ Reset

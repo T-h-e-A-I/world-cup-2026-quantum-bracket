@@ -174,11 +174,12 @@ export function drawBracketCard(x: CanvasRenderingContext2D, d: BracketCard): vo
   // every match (R32 .. Final)
   for (const n of d.nodes) drawBox(n.level, n.start, n.aId, n.bId, n.winnerId);
 
-  // champion ribbon under the final
+  // champion ribbon under the final (wider than a match box so the flag + name fit)
   const fin = rectOf(5, 0);
-  const cyChamp = fin.cy + BOXH / 2 + 54;
   const cx = fin.x + BOXW / 2;
-  roundRect(x, fin.x - 18, cyChamp - 34, BOXW + 36, 68, 14);
+  const ribbonW = COLW * 1.7;
+  const cyChamp = fin.cy + BOXH / 2 + 56;
+  roundRect(x, cx - ribbonW / 2, cyChamp - 36, ribbonW, 72, 14);
   x.fillStyle = "rgba(216,168,56,0.12)";
   x.fill();
   x.strokeStyle = "rgba(216,168,56,0.5)";
@@ -189,8 +190,8 @@ export function drawBracketCard(x: CanvasRenderingContext2D, d: BracketCard): vo
   x.font = `700 12px ${SANS}`;
   x.fillText("🏆 CHAMPION", cx, cyChamp - 16);
   x.fillStyle = WHITE;
-  x.font = `700 26px ${SANS}`;
-  x.fillText(trunc(x, `${flag(d.championId)}  ${name(d.championId)}`, BOXW + 24), cx, cyChamp + 12);
+  x.font = `700 24px ${SANS}`;
+  x.fillText(trunc(x, `${flag(d.championId)}  ${name(d.championId)}`, ribbonW - 44), cx, cyChamp + 14);
 
   // footer url
   x.textAlign = "right";

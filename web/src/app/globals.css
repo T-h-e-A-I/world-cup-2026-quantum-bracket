@@ -64,3 +64,14 @@ h1, h2, h3, .font-display {
 }
 
 .tabular { font-variant-numeric: tabular-nums; }
+
+/* round-by-round collapse: a freshly decided winner pops in */
+@keyframes collapsePop {
+  0% { transform: scale(0.94); opacity: 0.35; }
+  60% { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.collapse-pop { animation: collapsePop 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .collapse-pop { animation: none; }
+}
