@@ -154,7 +154,7 @@ export default function Bracket() {
 
       <p className="mb-4 flex items-center gap-1.5 text-sm text-mute">
         <span className="text-ink">Tap a team to advance it.</span>
-        <Info align="left">
+        <Info>
           <span className="block">Picks collapse the whole site — every page updates to this scenario; reset from the top bar.</span>
           <span className="mt-2 block">
             <b className="tabular text-mute">2–1</b> = predicted score ·{" "}

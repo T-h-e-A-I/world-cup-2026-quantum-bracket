@@ -1,8 +1,9 @@
 import { TeamChip } from "./ui";
+import { encodeResults } from "@/lib/share";
 import type { Reality } from "@/lib/engine";
 
 const oneIn = (p: number) => (p > 0 ? `1 in ${Math.round(1 / p).toLocaleString()}` : "—");
-const href = (r: Reality) => `/bracket?r=${encodeURIComponent(JSON.stringify(r.winners))}`;
+const href = (r: Reality) => `/bracket?r=${encodeResults(r.winners)}`;
 
 /** Compact, tappable list of complete brackets (loads into Play Bracket). */
 export function RealityList({ items, empty }: { items: Reality[]; empty?: string }) {

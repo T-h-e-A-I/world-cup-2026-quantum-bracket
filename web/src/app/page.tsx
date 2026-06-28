@@ -9,6 +9,7 @@ import { MODEL, pct, tname, big, pred } from "@/lib/model";
 import { TeamChip, Bar, Pct, Score } from "@/components/ui";
 import { Flag } from "@/components/Flag";
 import { Info } from "@/components/Info";
+import { encodeResults } from "@/lib/share";
 import ShareBar from "@/components/ShareBar";
 
 const STRANGE_FUTURES = 14000605; // Doctor Strange's count
@@ -159,7 +160,7 @@ export default function Home() {
         <ol className="mt-2 rows">
           {realities.slice(0, shown).map((r, i) => {
             const runnerUp = r.finalists[0] === r.champion ? r.finalists[1] : r.finalists[0];
-            const href = `/bracket?r=${encodeURIComponent(JSON.stringify(r.winners))}`;
+            const href = `/bracket?r=${encodeResults(r.winners)}`;
             return (
               <li key={i}>
                 <a href={href} className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2.5 text-sm hover:bg-void2">

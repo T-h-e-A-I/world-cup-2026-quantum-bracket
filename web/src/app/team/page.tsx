@@ -34,7 +34,7 @@ export default function TeamPage() {
     <div className="space-y-12">
       <h1 className="flex items-center gap-2 text-3xl font-bold sm:text-4xl">
         My team’s odds
-        <Info align="left">
+        <Info>
           64 routes to the final × 16 possible opponents = 1,024 final scenarios, all computed
           exactly.
         </Info>

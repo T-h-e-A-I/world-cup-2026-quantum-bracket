@@ -5,6 +5,7 @@ import {
 } from "react";
 import { MODEL } from "./model";
 import { winsubTable, homeView, type Home } from "./engine";
+import { encodeResults, decodeResults } from "./share";
 import OFFICIAL from "@/data/results.json";
 import type { Results } from "./types";
 
@@ -43,7 +44,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
     try {
       const url = new URL(window.location.href);
       const r = url.searchParams.get("r");
-      if (r) loaded = JSON.parse(decodeURIComponent(r));
+      if (r) loaded = decodeResults(r);
       else {
         const ls = localStorage.getItem(STORAGE_KEY);
         if (ls) loaded = JSON.parse(ls);
@@ -90,8 +91,8 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
   const shareUrl = useCallback(() => {
     if (typeof window === "undefined") return "";
     const u = new URL(window.location.origin + window.location.pathname);
-    if (Object.keys(overlay).length)
-      u.searchParams.set("r", encodeURIComponent(JSON.stringify(overlay)));
+    const code = encodeResults(overlay);
+    if (code) u.searchParams.set("r", code);
     return u.toString();
   }, [overlay]);
 

@@ -30,7 +30,7 @@ export default function MatchupPage() {
     <div className="space-y-10">
       <h1 className="flex items-center gap-2 text-3xl font-bold sm:text-4xl">
         Will they meet?
-        <Info align="left">Because the bracket is fixed, any two teams can collide in exactly one round.</Info>
+        <Info>Because the bracket is fixed, any two teams can collide in exactly one round.</Info>
       </h1>
 
       <div className="grid items-end gap-4 sm:grid-cols-[1fr_auto_1fr]">
@@ -67,7 +67,7 @@ export default function MatchupPage() {
           <div className="mb-1 flex items-center justify-between text-sm">
             <span className="flex items-center gap-1.5 text-mute">
               Probability they actually meet
-              <Info align="left">
+              <Info>
                 P(meet) = P({tname(a)} reaches {round}) × P({tname(b)} reaches {round}) ={" "}
                 {pct(reachA)} × {pct(reachB)} = {pct(p)}.
               </Info>

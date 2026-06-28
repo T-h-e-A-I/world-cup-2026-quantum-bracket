@@ -80,7 +80,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               sampled. Ratings are approximate and editable — not affiliated with FIFA.
             </p>
             <p className="mt-1">
-              Open source, built in public ·{" "}
+              Built by{" "}
+              <a href="https://aweshislam.com" target="_blank" rel="noopener noreferrer" className="font-medium text-mute underline hover:text-ink">
+                Awesh Islam
+              </a>{" "}
+              · open source on{" "}
               <a href="https://github.com/T-h-e-A-I/world-cup-2026-quantum-bracket" target="_blank" rel="noopener noreferrer" className="underline hover:text-mute">
                 GitHub
               </a>
