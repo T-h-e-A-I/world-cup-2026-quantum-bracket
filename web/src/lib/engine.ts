@@ -141,14 +141,16 @@ interface SubOutcome { winner: number; p: number; winners: Results }
 
 // `force` pins the emergent winner of specific subtrees (nodeId -> team id) — used to
 // condition complete brackets on "team a wins its subtree AND team b wins its subtree".
+// `wt(i,j)` is the ranking weight for "i beats j". Defaults to the real model (adv) →
+// top brackets by probability. Swap it (adv(j,i)) to rank by upset-likelihood (chaos).
 function subOutcomes(
   level: number, start: number, results: Results, n: number,
-  force: Results = {},
+  force: Results = {}, wt: (i: number, j: number) => number = adv,
 ): SubOutcome[] {
   if (level === 0) return [{ winner: start, p: 1, winners: {} }];
   const half = 1 << (level - 1);
-  const L = subOutcomes(level - 1, start, results, n, force);
-  const R = subOutcomes(level - 1, start + half, results, n, force);
+  const L = subOutcomes(level - 1, start, results, n, force, wt);
+  const R = subOutcomes(level - 1, start + half, results, n, force, wt);
   const nodeId = `L${level}-${start}`;
   const decided = results[nodeId];
   const forced = force[nodeId];
@@ -163,8 +165,8 @@ function subOutcomes(
         if (decided === wl) cands.push({ p: pair, winner: wl, li, ri });
         else if (decided === wr) cands.push({ p: pair, winner: wr, li, ri });
       } else {
-        cands.push({ p: pair * adv(wl, wr), winner: wl, li, ri });
-        cands.push({ p: pair * adv(wr, wl), winner: wr, li, ri });
+        cands.push({ p: pair * wt(wl, wr), winner: wl, li, ri });
+        cands.push({ p: pair * wt(wr, wl), winner: wr, li, ri });
       }
     }
   }
@@ -202,6 +204,24 @@ export function topRealities(results: Results, n = 10): Reality[] {
 /** A pool of strong candidate brackets (up to `capPerChampion` per possible champion). */
 export function realityPool(results: Results, capPerChampion = 10): Reality[] {
   return subOutcomes(L_MAX, 0, results, capPerChampion).map(toReality).sort((a, b) => b.p - a.p);
+}
+
+/**
+ * A pool of cursed brackets: the single most upset-heavy world for EACH possible
+ * champion (ranked by an inverted model, so underdogs run the table), deduped by
+ * champion so every draw can crown a different longshot — not the same all-underdogs
+ * bracket every time. `p` is the real (tiny) probability, for honest display.
+ */
+export function chaosRealities(results: Results, n = 50): Reality[] {
+  const all = subOutcomes(L_MAX, 0, results, 6, {}, (i, j) => adv(j, i))
+    .map(toReality)
+    .map((r) => ({ ...r, p: scenarioProbability(r.winners) }));
+  const best = new Map<number, Reality>();
+  for (const r of all) {
+    const cur = best.get(r.champion);
+    if (!cur || r.p < cur.p) best.set(r.champion, r); // keep the most improbable per champion
+  }
+  return [...best.values()].sort((a, b) => a.p - b.p).slice(0, n);
 }
 
 /**
