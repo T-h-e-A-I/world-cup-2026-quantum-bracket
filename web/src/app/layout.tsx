@@ -3,7 +3,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import Nav from "@/components/Nav";
 
-const TITLE = "WC26 Superposition — every 2026 World Cup reality at once";
+const TITLE = "Quantum Bracket — every 2026 World Cup reality at once";
 const DESC =
   "All 2.1 billion possible brackets of the 2026 FIFA World Cup, held in superposition with exact probabilities — collapsing as each result comes in.";
 

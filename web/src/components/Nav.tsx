@@ -16,8 +16,8 @@ export default function Nav() {
     <header className="sticky top-0 z-30 border-b border-line/80 bg-void/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
         <Link href="/" className="flex items-center gap-2 font-bold tracking-tight">
-          <span className="text-lg">🌌</span>
-          <span className="hidden sm:inline grad-text">WC26 Superposition</span>
+          <span className="text-lg">⚛️</span>
+          <span className="hidden sm:inline grad-text">Quantum Bracket</span>
         </Link>
         <nav className="ml-auto flex items-center gap-1 overflow-x-auto text-sm">
           {LINKS.map((l) => {

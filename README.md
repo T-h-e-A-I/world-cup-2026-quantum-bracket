@@ -1,6 +1,6 @@
-# 🌌 WC26 Superposition
+# ⚛️ Quantum Bracket
 
-**Every 2026 FIFA World Cup reality, at once.**
+### Every 2026 FIFA World Cup reality, at once.
 
 All **2,147,483,648** possible knockout brackets exist in superposition, each with an
 *exact* probability — and the wavefunction **collapses** as real results come in.
