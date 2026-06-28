@@ -1,0 +1,52 @@
+import { flag, tname, pct } from "@/lib/model";
+
+export function TeamChip({ id, className = "" }: { id: number; className?: string }) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 ${className}`}>
+      <span className="text-base leading-none">{flag(id)}</span>
+      <span className="truncate">{tname(id)}</span>
+    </span>
+  );
+}
+
+export function Bar({ p, gold = false }: { p: number; gold?: boolean }) {
+  return (
+    <div className={`bar h-2 w-full ${gold ? "gold" : ""}`}>
+      <span style={{ width: `${Math.min(100, Math.max(p * 100, p > 0 ? 1.5 : 0))}%` }} />
+    </div>
+  );
+}
+
+export function Pct({ p, d = 1, className = "" }: { p: number; d?: number; className?: string }) {
+  return <span className={`tabular ${className}`}>{pct(p, d)}</span>;
+}
+
+const CONF: Record<string, string> = {
+  High: "text-up border-up/40 bg-up/10",
+  Medium: "text-flux border-flux/40 bg-flux/10",
+  "Toss-up": "text-down border-down/40 bg-down/10",
+};
+export function Confidence({ label, value }: { label: string; value: number }) {
+  return (
+    <span className={`chip px-2 py-0.5 text-[11px] font-medium ${CONF[label] ?? ""}`}>
+      {label} · {value}
+    </span>
+  );
+}
+
+export function Score({ a, b }: { a: number; b: number }) {
+  return (
+    <span className="tabular rounded-md border border-line bg-white/5 px-1.5 py-0.5 font-semibold">
+      {a}–{b}
+    </span>
+  );
+}
+
+export function SectionTitle({ children, hint }: { children: React.ReactNode; hint?: string }) {
+  return (
+    <div className="mb-3 flex items-baseline justify-between gap-3">
+      <h2 className="text-lg font-bold tracking-tight">{children}</h2>
+      {hint && <span className="text-xs text-faint">{hint}</span>}
+    </div>
+  );
+}

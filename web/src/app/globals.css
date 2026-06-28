@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* ============ Superposition design system ============ */
+@theme {
+  --color-void: #06070e;
+  --color-void2: #0b0d1a;
+  --color-panel: #11142a;
+  --color-line: #232744;
+  --color-ink: #eef0ff;
+  --color-mute: #9aa0c6;
+  --color-faint: #6a6f96;
+
+  --color-quantum: #7c5cff; /* violet */
+  --color-flux: #22d3ee;    /* cyan */
+  --color-champ: #f6c453;   /* trophy gold */
+  --color-up: #2dd4a7;      /* favored */
+  --color-down: #ff6b8b;    /* upset */
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html, body {
+  background: var(--color-void);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-image:
+    radial-gradient(60rem 60rem at 75% -10%, rgba(124, 92, 255, 0.18), transparent 60%),
+    radial-gradient(50rem 50rem at 5% 0%, rgba(34, 211, 238, 0.12), transparent 55%);
+  background-attachment: fixed;
+}
+
+/* thin custom scrollbar */
+*::-webkit-scrollbar { height: 8px; width: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 99px; }
+
+@layer components {
+  .card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+    border: 1px solid var(--color-line);
+    border-radius: 1rem;
+    backdrop-filter: blur(8px);
+  }
+  .chip {
+    border: 1px solid var(--color-line);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 999px;
+  }
+  .grad-text {
+    background: linear-gradient(100deg, var(--color-flux), var(--color-quantum) 55%, var(--color-champ));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* probability bar */
+  .bar { background: rgba(255, 255, 255, 0.06); border-radius: 999px; overflow: hidden; }
+  .bar > span {
+    display: block; height: 100%;
+    background: linear-gradient(90deg, var(--color-flux), var(--color-quantum));
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bar.gold > span { background: linear-gradient(90deg, var(--color-quantum), var(--color-champ)); }
+}
+
+/* probability values animate when the wavefunction collapses */
+.tabular { font-variant-numeric: tabular-nums; }
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 92, 255, 0.0); }
+  50% { box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.18); }
+}
+.collapsing { animation: pulseGlow 0.6s ease-out; }
+
+@keyframes shimmer {
+  to { background-position: 200% center; }
+}
+.shimmer {
+  background: linear-gradient(90deg, var(--color-flux), var(--color-quantum), var(--color-champ), var(--color-flux));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s linear infinite;
+}
