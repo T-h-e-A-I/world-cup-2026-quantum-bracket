@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTournament } from "@/lib/store";
-import { probMeet, meetLevel, realityPool, meetInBracket } from "@/lib/engine";
+import { probMeet, meetLevel, topMeetingRealities } from "@/lib/engine";
 import { ROUNDS, tname, pct, pred } from "@/lib/model";
 import { Bar, Pct, Score, Confidence } from "@/components/ui";
 import { Flag } from "@/components/Flag";
@@ -23,8 +23,7 @@ export default function MatchupPage() {
   const reachA = W[a][level - 1];
   const reachB = W[b][level - 1];
   const favA = pr.score[0] >= pr.score[1];
-  const pool = useMemo(() => realityPool(results, 10), [results]);
-  const meetWorlds = pool.filter((r) => meetInBracket(r.winners, a, b)).slice(0, 5);
+  const meetWorlds = useMemo(() => topMeetingRealities(results, a, b, 5), [results, a, b]);
 
   return (
     <div className="space-y-10">

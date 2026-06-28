@@ -139,13 +139,19 @@ export function homeView(W: number[][], results: Results): Home {
 // (a bracket can only be globally top-N if each half is top-N for its winner).
 interface SubOutcome { winner: number; p: number; winners: Results }
 
-function subOutcomes(level: number, start: number, results: Results, n: number): SubOutcome[] {
+// `force` pins the emergent winner of specific subtrees (nodeId -> team id) — used to
+// condition complete brackets on "team a wins its subtree AND team b wins its subtree".
+function subOutcomes(
+  level: number, start: number, results: Results, n: number,
+  force: Results = {},
+): SubOutcome[] {
   if (level === 0) return [{ winner: start, p: 1, winners: {} }];
   const half = 1 << (level - 1);
-  const L = subOutcomes(level - 1, start, results, n);
-  const R = subOutcomes(level - 1, start + half, results, n);
+  const L = subOutcomes(level - 1, start, results, n, force);
+  const R = subOutcomes(level - 1, start + half, results, n, force);
   const nodeId = `L${level}-${start}`;
   const decided = results[nodeId];
+  const forced = force[nodeId];
 
   const cands: { p: number; winner: number; li: number; ri: number }[] = [];
   for (let li = 0; li < L.length; li++) {
@@ -162,6 +168,8 @@ function subOutcomes(level: number, start: number, results: Results, n: number):
       }
     }
   }
+  if (forced !== undefined)
+    for (let k = cands.length - 1; k >= 0; k--) if (cands[k].winner !== forced) cands.splice(k, 1);
   cands.sort((a, b) => b.p - a.p);
 
   const perWinner = new Map<number, number>();
@@ -194,6 +202,37 @@ export function topRealities(results: Results, n = 10): Reality[] {
 /** A pool of strong candidate brackets (up to `capPerChampion` per possible champion). */
 export function realityPool(results: Results, capPerChampion = 10): Reality[] {
   return subOutcomes(L_MAX, 0, results, capPerChampion).map(toReality).sort((a, b) => b.p - a.p);
+}
+
+/**
+ * Top-`n` most probable COMPLETE brackets in which i and j actually meet.
+ * Conditions the tree DP so i wins its subtree and j wins the adjoining one (so they
+ * collide at their only possible round), then ranks — this surfaces BOTH champions,
+ * unlike filtering a generic pool, where a longshot finalist gets capped out.
+ */
+export function topMeetingRealities(results: Results, i: number, j: number, n = 5): Reality[] {
+  const L = meetLevel(i, j);
+  if (L === 1) {
+    // Adjacent teams always play their Round-of-32 game — every bracket is a "meeting".
+    return topRealities(results, n);
+  }
+  const iStart = (i >> (L - 1)) << (L - 1);
+  const jStart = (j >> (L - 1)) << (L - 1);
+  const force: Results = { [`L${L - 1}-${iStart}`]: i, [`L${L - 1}-${jStart}`]: j };
+  const all = subOutcomes(L_MAX, 0, results, n, force)
+    .map(toReality)
+    .filter((r) => meetInBracket(r.winners, i, j))
+    .sort((a, b) => b.p - a.p);
+  // Diversify: the likeliest world for each possible champion first (so both teams'
+  // winning worlds surface), then fill remaining slots with the next-best overall.
+  const seen = new Set<number>();
+  const primary: Reality[] = [];
+  const rest: Reality[] = [];
+  for (const r of all) {
+    if (seen.has(r.champion)) rest.push(r);
+    else { seen.add(r.champion); primary.push(r); }
+  }
+  return [...primary, ...rest].slice(0, n);
 }
 
 /** Does this complete bracket have i and j actually playing each other? */
