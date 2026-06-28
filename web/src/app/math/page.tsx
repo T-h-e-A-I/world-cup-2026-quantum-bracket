@@ -1,9 +1,13 @@
 import { MODEL, big } from "@/lib/model";
 
-export const metadata = { title: "The Math — WC26 Superposition" };
+export const metadata = { title: "The Math — Quantum Bracket" };
 
 function K({ children }: { children: React.ReactNode }) {
-  return <code className="rounded bg-white/5 px-1.5 py-0.5 text-flux">{children}</code>;
+  return (
+    <code className="rounded border border-line bg-void2 px-1.5 py-0.5 font-mono text-[0.85em] text-quantum">
+      {children}
+    </code>
+  );
 }
 
 export default function MathPage() {
@@ -41,7 +45,7 @@ export default function MathPage() {
           In a knockout there are no draws. We take the regulation win/draw probabilities from the
           Poisson grid and resolve a draw as a 50/50 shootout:
         </p>
-        <pre className="overflow-x-auto rounded-xl border border-line bg-black/30 p-4 text-sm text-mute">
+        <pre className="overflow-x-auto rounded-xl border border-line bg-void2 p-4 text-sm text-ink">
 {`P(i advances) = P(i wins in 90′) + ½ · P(draw)`}
         </pre>
         <p>
@@ -55,7 +59,7 @@ export default function MathPage() {
           <K>winsub[i][L]</K>, the probability team <K>i</K> wins the size-2<sup>L</sup> subtree it
           sits in:
         </p>
-        <pre className="overflow-x-auto rounded-xl border border-line bg-black/30 p-4 text-sm text-mute">
+        <pre className="overflow-x-auto rounded-xl border border-line bg-void2 p-4 text-sm text-ink">
 {`winsub[i][L] = winsub[i][L-1] · Σ_j  winsub[j][L-1] · P(i beats j)`}
         </pre>
         <p>

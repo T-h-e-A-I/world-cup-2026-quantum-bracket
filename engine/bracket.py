@@ -38,7 +38,8 @@ TEAMS = [
     ("Norway",               "\U0001F1F3\U0001F1F4", 1805),  # M78
     ("Mexico",               "\U0001F1F2\U0001F1FD", 1800),  # M79
     ("Ecuador",              "\U0001F1EA\U0001F1E8", 1825),  # M79
-    ("England",              "\U0001F3F4", 1985),            # M80
+    # England has no ISO flag — use the GB-ENG subdivision tag sequence
+    ("England", "\U0001F3F4\U000E0067\U000E0062\U000E0065\U000E006E\U000E0067\U000E007F", 1985),  # M80
     ("Congo DR",             "\U0001F1E8\U0001F1E9", 1700),  # M80
     ("Argentina",            "\U0001F1E6\U0001F1F7", 2105),  # M86
     ("Cabo Verde",           "\U0001F1E8\U0001F1FB", 1650),  # M86

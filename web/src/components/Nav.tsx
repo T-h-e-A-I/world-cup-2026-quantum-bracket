@@ -3,11 +3,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "Superposition" },
-  { href: "/bracket", label: "Collapse the Bracket" },
+  { href: "/", label: "Home" },
+  { href: "/bracket", label: "Play Bracket" },
   { href: "/team", label: "My Team" },
   { href: "/matchup", label: "Will They Meet?" },
-  { href: "/math", label: "The Math" },
+  { href: "/math", label: "How it works" },
 ];
 
 export default function Nav() {

@@ -23,7 +23,7 @@ function slot(node: MatchNode, side: 0 | 1, results: Results, W: number[][]): Sl
 }
 
 function MatchCard({ node }: { node: MatchNode }) {
-  const { results, W, setResult, clearResult } = useTournament();
+  const { sbResults: results, sbW: W, setResult, clearResult } = useTournament();
   const a = slot(node, 0, results, W);
   const b = slot(node, 1, results, W);
   const playable = a.decided && b.decided;
@@ -83,7 +83,7 @@ function Column({ nodes, label }: { nodes: MatchNode[]; label: string }) {
 }
 
 function ChampionCore() {
-  const { W, results } = useTournament();
+  const { sbW: W, sbResults: results } = useTournament();
   const fav = useMemo(() => favoriteIn(W, 0, 5), [W]);
   const finalDecided = results["L5-0"] !== undefined;
   return (
@@ -102,33 +102,31 @@ function ChampionCore() {
 }
 
 export default function Bracket() {
-  const { home, exploring, reset } = useTournament();
+  const { sbHome: home, exploring, reset } = useTournament();
 
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="card flex items-center gap-2 px-3 py-1.5 text-sm">
-          <span className="text-mute">Realities remaining</span>
-          <span className="tabular shimmer font-bold">{home.realitiesLeft.toLocaleString()}</span>
+        <div className="card px-3 py-1.5 text-sm">
+          <span className="text-mute">Possible brackets left </span>
+          <span className="tabular font-bold">{home.realitiesLeft.toLocaleString()}</span>
         </div>
         <div className="card px-3 py-1.5 text-sm">
-          <span className="text-mute">Matches decided </span>
+          <span className="text-mute">Picked </span>
           <span className="tabular font-bold">{home.decided}/31</span>
         </div>
-        {exploring && (
-          <button
-            onClick={reset}
-            className="ml-auto chip px-3 py-1.5 text-sm text-mute hover:text-ink"
-          >
-            ↺ Reset to reality
-          </button>
-        )}
+        <button
+          onClick={reset}
+          disabled={!exploring}
+          className="ml-auto chip px-3 py-1.5 text-sm text-mute enabled:hover:text-ink disabled:opacity-40"
+        >
+          ↺ Reset bracket
+        </button>
       </div>
 
       <p className="mb-4 text-sm text-mute">
-        Click a team to send it through. Each pick <span className="text-ink">collapses</span> the
-        superposition and re-weights every probability. Ghosted italic names are the current
-        favorites to arrive — they sharpen as you decide the rounds below.
+        <span className="text-ink">Tap a team to advance it.</span> Greyed italic names show who’s
+        most likely to get there — they update as you fill in the earlier rounds.
       </p>
 
       <div className="overflow-x-auto pb-4">

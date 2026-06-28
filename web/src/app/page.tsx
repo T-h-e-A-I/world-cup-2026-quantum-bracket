@@ -7,7 +7,7 @@ import { TeamChip, Bar, Pct, SectionTitle, Score } from "@/components/ui";
 import ShareBar from "@/components/ShareBar";
 
 export default function Home() {
-  const { home, exploring } = useTournament();
+  const { home } = useTournament();
   const topFinal = home.finals[0];
   const fav = home.champions[0];
 
@@ -32,9 +32,9 @@ export default function Home() {
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/bracket"
-            className="rounded-full bg-gradient-to-r from-flux to-quantum px-5 py-2.5 font-semibold text-void shadow-lg shadow-quantum/20 transition hover:brightness-110"
+            className="rounded-full bg-ink px-5 py-2.5 font-semibold text-white shadow-sm transition hover:opacity-90"
           >
-            Collapse the bracket →
+            Play out the bracket →
           </Link>
           <Link href="/team" className="chip px-5 py-2.5 font-medium hover:bg-white/10">
             Find my team’s odds
@@ -48,11 +48,6 @@ export default function Home() {
           <Stat label="Favorite" value={`${flag(fav.id)} ${pct(fav.p, 0)}`} />
           <Stat label="Likeliest final" value={`${flag(topFinal.a)} v ${flag(topFinal.b)}`} />
         </div>
-        {exploring && (
-          <p className="mt-3 text-xs text-flux">
-            ◆ You’re exploring a collapsed branch — numbers below reflect your scenario.
-          </p>
-        )}
       </section>
 
       {/* favorites + finals */}
