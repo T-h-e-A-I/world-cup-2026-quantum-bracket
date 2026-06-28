@@ -8,6 +8,30 @@ All **2,147,483,648** possible knockout brackets exist in superposition, each wi
 No Monte-Carlo guessing: because the Round-of-32 bracket is fixed, every number on the
 site is computed exactly with a dynamic-programming pass over the bracket tree.
 
+## The collapse, by the numbers
+
+The knockout is **31 single-elimination matches**, so the bracket can fill out in
+2³¹ = **2,147,483,648** distinct ways — the full superposition the app starts from. That
+number is *already* a colossal collapse: the group stage decided **which** 32 teams are
+here and **where** they sit, narrowing a far larger space down to this fixed bracket.
+Quantum Bracket picks up the instant the Round of 32 is set.
+
+From here, every completed match fixes one binary choice and **halves** what remains —
+so the realities still alive are exact at every stage:
+
+| Stage | Matches decided | Realities still alive | Share of the original 2.1B |
+|---|---:|---:|---:|
+| Round of 32 set (kickoff) | 0 / 31 | **2,147,483,648** | 100% |
+| After the Round of 32 | 16 / 31 | 32,768 | 0.0015% |
+| After the Round of 16 | 24 / 31 | 128 | 0.000006% |
+| After the Quarter-finals | 28 / 31 | 8 | — |
+| After the Semi-finals | 30 / 31 | 2 | — |
+| After the Final | 31 / 31 | **1** | one timeline |
+
+The live counter on the site is exactly `2^(31 − matches decided)`, ticking down as
+[`web/src/data/results.json`](web/src/data/results.json) fills in. **Right now we're working
+with the full 2.1 billion** — nothing in the knockout has collapsed yet.
+
 | | |
 |---|---|
 | **Superposition** | Title favorites, most-probable finals, the single likeliest reality, and a live counter of how many realities remain. |
