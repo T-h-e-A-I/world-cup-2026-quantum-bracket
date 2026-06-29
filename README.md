@@ -2,6 +2,8 @@
 
 ### Every 2026 FIFA World Cup reality, at once.
 
+**[▶ Live: bracket.aweshislam.com](https://bracket.aweshislam.com)** · free, no signup
+
 All **2,147,483,648** possible knockout brackets exist in superposition, each with an
 *exact* probability — and the wavefunction **collapses** as real results come in.
 
