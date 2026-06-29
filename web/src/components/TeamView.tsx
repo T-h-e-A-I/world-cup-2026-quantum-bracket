@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTournament } from "@/lib/store";
 import { reach, modalPath, finalOpponents, realityPool } from "@/lib/engine";
-import { tname, pct, pred, slug } from "@/lib/model";
+import { tname, pct, pred, slug, ROUNDS } from "@/lib/model";
 import { TeamChip, Bar, Pct, Score, Confidence } from "@/components/ui";
 import { Flag } from "@/components/Flag";
 import { RealityList } from "@/components/RealityList";
@@ -12,7 +12,6 @@ import { Info } from "@/components/Info";
 import TeamSelect from "@/components/TeamSelect";
 import ShareBar from "@/components/ShareBar";
 
-const ROUND_LABELS = ["Round of 16", "Quarterfinal", "Semifinal", "Final", "Champion"];
 
 export default function TeamView({ initialId }: { initialId: number }) {
   const router = useRouter();
@@ -80,14 +79,14 @@ export default function TeamView({ initialId }: { initialId: number }) {
 
       {/* modal path */}
       <section>
-        <H2 hint="strongest expected opponent each round">Most likely path to the final</H2>
-        <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+        <H2 hint="likely opponent each round">Most likely route to the title</H2>
+        <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
           {path.map((st) => {
             const p = pred(id, st.opp);
             return (
               <div key={st.level} className="rounded-2xl bg-void2 p-3.5">
                 <div className="text-[10px] uppercase tracking-widest text-faint">
-                  {ROUND_LABELS[st.level - 1]}
+                  {ROUNDS[st.level - 1]}
                 </div>
                 <div className="mt-1.5 flex items-center gap-2">
                   <span className="text-mute">vs</span>

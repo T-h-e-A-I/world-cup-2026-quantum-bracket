@@ -84,11 +84,11 @@ export function finalOpponents(W: number[][], i: number): FinalOpp[] {
 export interface PathStep {
   level: number; opp: number; pOppHere: number; advance: number; cum: number;
 }
-/** Most-likely route to the final: the strongest expected opponent each round. */
+/** Most-likely route to the title: the strongest expected opponent each round (R32 → Final). */
 export function modalPath(W: number[][], i: number): PathStep[] {
   const out: PathStep[] = [];
   let cum = 1;
-  for (let L = 1; L <= 4; L++) {
+  for (let L = 1; L <= 5; L++) {
     const [a, b] = siblingBlock(i, L);
     let opp = a,
       best = -1;
