@@ -19,7 +19,6 @@ export default function Home() {
   const { home, results } = useTournament();
   const [shown, setShown] = useState(10);
   const realities = useMemo(() => topRealities(results, 50), [results]);
-  const topFinal = home.finals[0];
   const fav = home.champions[0];
   const topRealityP = realities[0]?.p ?? 1;
   const oneIn = (p: number) => (p > 0 ? `1 in ${Math.round(1 / p).toLocaleString()}` : "—");
@@ -60,13 +59,11 @@ export default function Home() {
 
         {/* collapse meter — one strip, no nested boxes */}
         <dl className="mx-auto mt-9 grid max-w-2xl grid-cols-2 overflow-hidden rounded-2xl border border-line sm:grid-cols-4">
-          <Stat label="Realities left" value={home.realitiesLeft.toLocaleString()} />
+          <Stat label="Realities at kickoff" value={big(MODEL.meta.realities)} />
+          <Stat label="Still possible" value={home.realitiesLeft.toLocaleString()} />
           <Stat label="Decided" value={`${home.decided}/31`} />
           <Stat label="Favorite">
             <Flag id={fav.id} /> <span className="tabular">{pct(fav.p, 0)}</span>
-          </Stat>
-          <Stat label="Likeliest final">
-            <Flag id={topFinal.a} /> <span className="text-faint">v</span> <Flag id={topFinal.b} />
           </Stat>
         </dl>
       </section>
@@ -207,7 +204,7 @@ function Stat({
   return (
     <div className="border-b border-line px-3 py-3 [&:nth-child(odd)]:border-r sm:border-b-0 sm:[&:not(:last-child)]:border-r">
       <dt className="text-[10px] uppercase tracking-widest text-faint">{label}</dt>
-      <dd className="tabular mt-1 flex items-center justify-center gap-1.5 text-base font-bold sm:text-lg">
+      <dd className="tabular mt-1 flex items-center justify-center gap-1.5 text-sm font-bold sm:text-base">
         {value ?? children}
       </dd>
     </div>

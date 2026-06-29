@@ -1,5 +1,6 @@
 "use client";
 import { useTournament } from "@/lib/store";
+import { MODEL } from "@/lib/model";
 
 /** Thin live strip under the nav — shows how collapsed the tournament is, everywhere. */
 export default function CollapseStatus() {
@@ -15,7 +16,7 @@ export default function CollapseStatus() {
         </span>
         <span className="font-semibold text-ink">{decided}/31 decided</span>
         <span className="hidden text-mute sm:inline">
-          · {home.realitiesLeft.toLocaleString()} realities left
+          · {home.realitiesLeft.toLocaleString()} of {MODEL.meta.realities.toLocaleString()} realities left
         </span>
         {exploring && (
           <span className="rounded-full bg-quantum/15 px-2 py-0.5 text-[11px] font-medium text-quantum">
