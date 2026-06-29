@@ -20,6 +20,7 @@ Design notes:
 
 import json
 import os
+import re
 import sys
 import unicodedata
 import urllib.request
@@ -29,6 +30,7 @@ from bracket import NAMES, MATCH_NO, matches
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS_PATH = os.path.join(ROOT, "web", "src", "data", "results.json")
+SCORES_PATH = os.path.join(ROOT, "web", "src", "data", "scores.json")
 API_URL = "https://api.football-data.org/v4/competitions/WC/matches"
 
 # football-data.org names that differ from ours (normalized key -> our canonical name)
@@ -82,9 +84,11 @@ def participants(node, results):
     return [a, b] if a is not None and b is not None else None
 
 
-def build_results(finished, existing):
-    """Pure mapper: finished = list of {idA, idB, winner_id, level_hint}. Returns results dict."""
+def build_results(finished, existing, existing_scores=None):
+    """Pure mapper: finished = list of {idA, idB, winner_id, level_hint, gA?, gB?}.
+    Returns (results, scores). scores[node] = [goals, goals] in participant order."""
     results = dict(existing)
+    scores = dict(existing_scores or {})
     for level in range(1, 6):
         nodes = [n for n in NODES if n["level"] == level]
         for m in finished:
@@ -95,8 +99,14 @@ def build_results(finished, existing):
                 parts = participants(node, results)
                 if parts and set(parts) == pair:
                     results[node["id"]] = m["winner_id"]
+                    if m.get("gA") is not None and m.get("gB") is not None:
+                        # gA scored by idA (home), gB by idB (away); store in participant order
+                        scores[node["id"]] = [
+                            m["gA"] if parts[0] == m["idA"] else m["gB"],
+                            m["gA"] if parts[1] == m["idA"] else m["gB"],
+                        ]
                     break
-    return results
+    return results, scores
 
 
 def fetch_finished(token):
@@ -125,8 +135,10 @@ def fetch_finished(token):
         else:  # DRAW after ET -> penalties; don't guess, enter with --set
             skipped.append(f"penalties/undecided ({stage}): {NAMES[ida]} vs {NAMES[idb]} — use --set")
             continue
+        ft = (m.get("score") or {}).get("fullTime") or {}
         out.append({"idA": ida, "idB": idb, "winner_id": wid,
-                    "level_hint": STAGE_LEVEL.get(stage)})
+                    "level_hint": STAGE_LEVEL.get(stage),
+                    "gA": ft.get("home"), "gB": ft.get("away")})
     return out, skipped
 
 
@@ -146,6 +158,22 @@ def write_results(results):
     return ordered
 
 
+def load_scores():
+    try:
+        with open(SCORES_PATH) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def write_scores(scores):
+    ordered = {n["id"]: scores[n["id"]] for n in NODES if n["id"] in scores}
+    with open(SCORES_PATH, "w") as f:
+        json.dump(ordered, f, indent=2)
+        f.write("\n")
+    return ordered
+
+
 def summarize(results):
     for n in NODES:
         if n["id"] in results:
@@ -153,7 +181,14 @@ def summarize(results):
             print(f"  {n['round']:<13} {n['id']:<7} -> {NAMES[w]}")
 
 
-def cmd_set(fifa_no, team_name):
+def cmd_set(fifa_no, rest):
+    # rest = [team words ...] optionally ending with a "W-L" score (winner's goals first)
+    score = None
+    if rest and re.fullmatch(r"\d+-\d+", rest[-1]):
+        score = rest[-1]
+        rest = rest[:-1]
+    team_name = " ".join(rest)
+
     node_id = NODE_BY_FIFA.get(int(fifa_no))
     if not node_id:
         sys.exit(f"No bracket node for FIFA match {fifa_no}")
@@ -167,7 +202,18 @@ def cmd_set(fifa_no, team_name):
         sys.exit(f"'{team_name}' is not a participant of {node_id}. Options: {opts}")
     results[node_id] = wid
     ordered = write_results(results)
-    print(f"Set {node_id} ({NAMES[wid]}). Now {len(ordered)}/31 decided.")
+
+    msg = f"Set {node_id} ({NAMES[wid]})"
+    if score:
+        wg, lg = (int(x) for x in score.split("-"))
+        loser = parts[1] if parts[0] == wid else parts[0]
+        # store in participant order [parts[0] goals, parts[1] goals]
+        sc = [wg, lg] if parts[0] == wid else [lg, wg]
+        scores = load_scores()
+        scores[node_id] = sc
+        write_scores(scores)
+        msg += f" {NAMES[wid]} {wg}-{lg} {NAMES[loser]}"
+    print(f"{msg}. Now {len(ordered)}/31 decided.")
 
 
 def main():
@@ -178,8 +224,8 @@ def main():
 
     if args and args[0] == "--set":
         if len(args) < 3:
-            sys.exit("usage: --set <fifa_match_no> <winning team name>")
-        return cmd_set(args[1], " ".join(args[2:]))
+            sys.exit("usage: --set <fifa_match_no> <winning team> [winnerGoals-loserGoals]")
+        return cmd_set(args[1], args[2:])
 
     dry = args and args[0] == "--print"
     token = os.environ.get("FOOTBALL_DATA_TOKEN")
@@ -194,12 +240,13 @@ def main():
         return
 
     existing = load_results()
-    results = build_results(finished, existing)
+    existing_scores = load_scores()
+    results, scores = build_results(finished, existing, existing_scores)
 
     for s in skipped:
         print(f"  skip: {s}")
 
-    if results == existing:
+    if results == existing and scores == existing_scores:
         print(f"No change ({len(existing)}/31 decided).")
         return
 
@@ -209,6 +256,7 @@ def main():
         return
 
     ordered = write_results(results)
+    write_scores(scores)
     print(f"Updated results.json — {len(ordered)}/31 decided:")
     summarize(ordered)
 
@@ -229,7 +277,7 @@ def selftest():
                              "winner_id": winner, "level_hint": level})
     # Now reconstruct purely through the mapper, from empty, ignoring level hints
     blind = [{**m, "level_hint": None} for m in finished]
-    rebuilt = build_results(blind, {})
+    rebuilt, _ = build_results(blind, {})
     assert len(rebuilt) == 31, f"expected 31 nodes, got {len(rebuilt)}"
     assert rebuilt == results, "mapper did not reconstruct the synthetic bracket"
     # Alias sanity

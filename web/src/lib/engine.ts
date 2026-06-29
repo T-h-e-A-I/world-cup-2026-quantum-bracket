@@ -3,8 +3,8 @@
 // winsub[i][L] = P(team i is the winner of the size-2^L subtree containing it),
 // GIVEN the results recorded so far. L: 0=in field,1=won R32,...,4=in final,5=champion.
 
-import { MODEL, N, adv } from "./model";
-import type { Results } from "./types";
+import { MODEL, N, adv, pred } from "./model";
+import type { Results, Scores } from "./types";
 
 export const L_MAX = 5;
 export const ROUND_OF_LEVEL = ["", "Round of 32", "Round of 16", "Quarterfinal", "Semifinal", "Final"];
@@ -321,15 +321,18 @@ export function scenarioProbability(results: Results): number {
   return p;
 }
 
-/** How the model's pre-match favorite has fared against the real (official) results. */
-export function modelAccuracy(official: Results): {
-  correct: number;
-  total: number;
+/** How the model's pre-match predictions have fared against the real (official) results. */
+export function modelAccuracy(official: Results, scores: Scores = {}): {
+  correct: number; // winners called right
+  total: number; // matches played
   hit: Record<string, boolean>; // node id -> did the model favor the actual winner
+  scoreCorrect: number; // exact scorelines called right
+  scoreTotal: number; // matches with a recorded score
+  scoreHit: Record<string, boolean>; // node id -> did the model nail the exact scoreline
 } {
   const hit: Record<string, boolean> = {};
-  let correct = 0;
-  let total = 0;
+  const scoreHit: Record<string, boolean> = {};
+  let correct = 0, total = 0, scoreCorrect = 0, scoreTotal = 0;
   for (const m of MODEL.matches) {
     const w = official[m.id];
     if (w === undefined) continue;
@@ -340,8 +343,17 @@ export function modelAccuracy(official: Results): {
     hit[m.id] = called;
     if (called) correct++;
     total++;
+
+    const actual = scores[m.id];
+    if (actual) {
+      const guess = pred(part[0], part[1]).score; // predicted [part0, part1] goals
+      const exact = guess[0] === actual[0] && guess[1] === actual[1];
+      scoreHit[m.id] = exact;
+      if (exact) scoreCorrect++;
+      scoreTotal++;
+    }
   }
-  return { correct, total, hit };
+  return { correct, total, hit, scoreCorrect, scoreTotal, scoreHit };
 }
 
 /** A node is playable once both its feeders are decided (R32 always playable). */

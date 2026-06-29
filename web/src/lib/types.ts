@@ -38,3 +38,6 @@ export interface Model {
 
 // A collapsed result: bracket node id -> winning team id
 export type Results = Record<string, number>;
+
+// Real final scores: bracket node id -> [goals, goals] in participant order
+export type Scores = Record<string, [number, number]>;

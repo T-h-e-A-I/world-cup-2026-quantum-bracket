@@ -29,9 +29,11 @@ function slot(node: MatchNode, side: 0 | 1, results: Results, W: number[][]): Sl
 }
 
 function MatchCard({ node }: { node: MatchNode }) {
-  const { results, W, setResult, clearResult, official, accuracy } = useTournament();
+  const { results, W, setResult, clearResult, official, scores, accuracy } = useTournament();
   const isOfficial = official[node.id] !== undefined;
   const called = accuracy.hit[node.id];
+  const actual = scores[node.id];
+  const scoreHit = accuracy.scoreHit[node.id];
   const a = slot(node, 0, results, W);
   const b = slot(node, 1, results, W);
   const playable = a.decided && b.decided;
@@ -74,11 +76,21 @@ function MatchCard({ node }: { node: MatchNode }) {
       <div className="flex items-center justify-between px-1 pb-0.5 text-[9px] uppercase tracking-wider text-faint">
         <span>{node.no ? `Match ${node.no}` : node.round}</span>
         {isOfficial ? (
-          <span
-            className={`font-semibold ${called ? "text-up" : "text-down"}`}
-            title={called ? "Model called this result" : "Upset — the model favored the other side"}
-          >
-            {called ? "✓ called" : "✗ upset"}
+          <span className="flex items-center gap-1">
+            {actual && (
+              <span
+                className={`tabular ${scoreHit ? "font-semibold text-up" : ""}`}
+                title={scoreHit ? "Model nailed the exact scoreline" : "Final score"}
+              >
+                {actual[0]}–{actual[1]}
+              </span>
+            )}
+            <span
+              className={`text-[11px] font-bold ${called ? "text-up" : "text-down"}`}
+              title={called ? "Model called the winner" : "Upset — the model favored the other side"}
+            >
+              {called ? "✓" : "✗"}
+            </span>
           </span>
         ) : (
           <span
@@ -193,6 +205,12 @@ export default function Bracket() {
           <div className="card px-3 py-1.5 text-sm" title="Real results where the model's favorite won">
             <span className="text-mute">Model called </span>
             <span className="tabular font-bold text-up">{accuracy.correct}/{accuracy.total}</span>
+          </div>
+        )}
+        {accuracy.scoreTotal > 0 && (
+          <div className="card px-3 py-1.5 text-sm" title="Real results where the model nailed the exact scoreline">
+            <span className="text-mute">Exact scores </span>
+            <span className="tabular font-bold">{accuracy.scoreCorrect}/{accuracy.scoreTotal}</span>
           </div>
         )}
         <div className="ml-auto flex flex-wrap items-center gap-2">

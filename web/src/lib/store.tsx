@@ -9,10 +9,12 @@ import {
 } from "./engine";
 import { encodeResults, decodeResults } from "./share";
 import OFFICIAL from "@/data/results.json";
-import type { Results } from "./types";
+import SCORES from "@/data/scores.json";
+import type { Results, Scores } from "./types";
 
 const STORAGE_KEY = "wc26-results-v3";
 const official = OFFICIAL as Results; // real completed matches the repo maintains
+const scores = SCORES as unknown as Scores; // real final scores for those matches
 
 // Chalk/Chaos pools depend only on the official baseline (constant per deploy), so
 // compute each once and cache. Repeat taps are then instant — important on weak phones.
@@ -26,7 +28,8 @@ const pickFrom = (pool: Results[]): Results =>
 interface Ctx {
   results: Results;   // official + your picks — drives EVERY page (the live collapse)
   official: Results;  // real completed matches only (for scoring the model)
-  accuracy: { correct: number; total: number; hit: Record<string, boolean> };
+  scores: Scores;     // real final scores for completed matches
+  accuracy: ReturnType<typeof modelAccuracy>;
   W: number[][];
   home: Home;
   decided: number;    // matches decided so far (official + picks)
@@ -84,7 +87,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
   const results = useMemo<Results>(() => ({ ...official, ...overlay }), [overlay]);
   const W = useMemo(() => winsubTable(results), [results]);
   const home = useMemo(() => homeView(W, results), [W, results]);
-  const accuracy = useMemo(() => modelAccuracy(official), []); // official is fixed per deploy
+  const accuracy = useMemo(() => modelAccuracy(official, scores), []); // fixed per deploy
 
   const setResult = useCallback((nodeId: string, winner: number) => {
     setOverlay((prev) => {
@@ -119,7 +122,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
   }, [overlay]);
 
   const value: Ctx = {
-    results, official, accuracy, W, home, decided: home.decided,
+    results, official, scores, accuracy, W, home, decided: home.decided,
     exploring: Object.keys(overlay).length > 0,
     setResult, clearResult, randomize, chalk, chaos, reset, shareUrl,
   };

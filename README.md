@@ -93,11 +93,16 @@ a **PR you review and merge**. Merging triggers a Vercel deploy. One-time setup:
 Without the secret the job is a harmless no-op. Penalty-shootout games are reported as draws
 by the API, so they're **skipped on purpose** and listed in the run log for manual entry.
 
-**Manual (easy).** Record a result by its FIFA match number — no node ids to memorise:
+**Manual (easy).** Record a result by its FIFA match number — no node ids to memorise.
+Add an optional `winnerGoals-loserGoals` score to also score the model's predicted scoreline:
 
 ```bash
-python engine/update_results.py --set 77 France   # Match 77 → France advance
+python engine/update_results.py --set 77 France       # Match 77 → France advance
+python engine/update_results.py --set 77 France 2-1   # …and the final score was 2-1
 ```
+
+The app then shows ✓ / ✗ per real match (did the model's favorite win?), a "Model called
+X/Y" tally, and an "Exact scores Z/W" tally for nailed scorelines.
 
 **Manual (raw).** Edit the JSON directly. Node ids are `L{level}-{startIndex}` (level 1 =
 Round of 32 … 5 = Final); team ids are indices into `model.json`'s `teams` array:
