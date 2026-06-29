@@ -321,6 +321,29 @@ export function scenarioProbability(results: Results): number {
   return p;
 }
 
+/** How the model's pre-match favorite has fared against the real (official) results. */
+export function modelAccuracy(official: Results): {
+  correct: number;
+  total: number;
+  hit: Record<string, boolean>; // node id -> did the model favor the actual winner
+} {
+  const hit: Record<string, boolean> = {};
+  let correct = 0;
+  let total = 0;
+  for (const m of MODEL.matches) {
+    const w = official[m.id];
+    if (w === undefined) continue;
+    const part = participants(m.id, official);
+    if (!part) continue;
+    const opp = part[0] === w ? part[1] : part[0];
+    const called = adv(w, opp) >= 0.5; // model favored the team that actually won?
+    hit[m.id] = called;
+    if (called) correct++;
+    total++;
+  }
+  return { correct, total, hit };
+}
+
 /** A node is playable once both its feeders are decided (R32 always playable). */
 export function participants(id: string, results: Results): [number, number] | null {
   const m = MODEL.matches.find((x) => x.id === id)!;

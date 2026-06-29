@@ -4,7 +4,7 @@ import { MODEL } from "@/lib/model";
 
 /** Thin live strip under the nav — shows how collapsed the tournament is, everywhere. */
 export default function CollapseStatus() {
-  const { decided, exploring, reset, home } = useTournament();
+  const { decided, exploring, reset, home, accuracy } = useTournament();
   if (decided === 0) return null; // full superposition → keep the chrome clean
 
   return (
@@ -18,6 +18,11 @@ export default function CollapseStatus() {
         <span className="hidden text-mute sm:inline">
           · {home.realitiesLeft.toLocaleString()} of {MODEL.meta.realities.toLocaleString()} realities left
         </span>
+        {accuracy.total > 0 && (
+          <span className="hidden font-medium text-up md:inline" title="Real results where the model's favorite won">
+            · model {accuracy.correct}/{accuracy.total}
+          </span>
+        )}
         {exploring && (
           <span className="rounded-full bg-quantum/15 px-2 py-0.5 text-[11px] font-medium text-quantum">
             your scenario

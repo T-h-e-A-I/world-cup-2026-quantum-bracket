@@ -5,7 +5,7 @@ import {
 } from "react";
 import { MODEL } from "./model";
 import {
-  winsubTable, homeView, randomBracket, topRealities, chaosRealities, type Home,
+  winsubTable, homeView, randomBracket, topRealities, chaosRealities, modelAccuracy, type Home,
 } from "./engine";
 import { encodeResults, decodeResults } from "./share";
 import OFFICIAL from "@/data/results.json";
@@ -25,6 +25,8 @@ const pickFrom = (pool: Results[]): Results =>
 
 interface Ctx {
   results: Results;   // official + your picks — drives EVERY page (the live collapse)
+  official: Results;  // real completed matches only (for scoring the model)
+  accuracy: { correct: number; total: number; hit: Record<string, boolean> };
   W: number[][];
   home: Home;
   decided: number;    // matches decided so far (official + picks)
@@ -82,6 +84,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
   const results = useMemo<Results>(() => ({ ...official, ...overlay }), [overlay]);
   const W = useMemo(() => winsubTable(results), [results]);
   const home = useMemo(() => homeView(W, results), [W, results]);
+  const accuracy = useMemo(() => modelAccuracy(official), []); // official is fixed per deploy
 
   const setResult = useCallback((nodeId: string, winner: number) => {
     setOverlay((prev) => {
@@ -116,7 +119,7 @@ export function TournamentProvider({ children }: { children: React.ReactNode }) 
   }, [overlay]);
 
   const value: Ctx = {
-    results, W, home, decided: home.decided,
+    results, official, accuracy, W, home, decided: home.decided,
     exploring: Object.keys(overlay).length > 0,
     setResult, clearResult, randomize, chalk, chaos, reset, shareUrl,
   };

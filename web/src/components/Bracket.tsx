@@ -29,7 +29,9 @@ function slot(node: MatchNode, side: 0 | 1, results: Results, W: number[][]): Sl
 }
 
 function MatchCard({ node }: { node: MatchNode }) {
-  const { results, W, setResult, clearResult } = useTournament();
+  const { results, W, setResult, clearResult, official, accuracy } = useTournament();
+  const isOfficial = official[node.id] !== undefined;
+  const called = accuracy.hit[node.id];
   const a = slot(node, 0, results, W);
   const b = slot(node, 1, results, W);
   const playable = a.decided && b.decided;
@@ -71,12 +73,21 @@ function MatchCard({ node }: { node: MatchNode }) {
     >
       <div className="flex items-center justify-between px-1 pb-0.5 text-[9px] uppercase tracking-wider text-faint">
         <span>{node.no ? `Match ${node.no}` : node.round}</span>
-        <span
-          className="tabular"
-          title={`Predicted result for the expected matchup · ${Math.round(pr.scoreProb * 100)}% likely scoreline`}
-        >
-          {pr.score[0]}–{pr.score[1]}
-        </span>
+        {isOfficial ? (
+          <span
+            className={`font-semibold ${called ? "text-up" : "text-down"}`}
+            title={called ? "Model called this result" : "Upset — the model favored the other side"}
+          >
+            {called ? "✓ called" : "✗ upset"}
+          </span>
+        ) : (
+          <span
+            className="tabular"
+            title={`Predicted result for the expected matchup · ${Math.round(pr.scoreProb * 100)}% likely scoreline`}
+          >
+            {pr.score[0]}–{pr.score[1]}
+          </span>
+        )}
       </div>
       <Row s={a} />
       <Row s={b} />
@@ -127,7 +138,7 @@ function ChampionCore() {
 }
 
 export default function Bracket() {
-  const { W, home, results, exploring, randomize, chalk, chaos, reset } = useTournament();
+  const { W, home, results, exploring, randomize, chalk, chaos, reset, accuracy } = useTournament();
   const sp = scenarioProbability(results);
   const complete = home.decided === 31;
   const oneIn = Math.round(1 / sp);
@@ -176,6 +187,12 @@ export default function Bracket() {
           <div className="card px-3 py-1.5 text-sm" title="How likely the model thinks this run of results is">
             <span className="text-mute">Scenario odds </span>
             <span className="tabular font-bold">1 in {oneIn.toLocaleString()}</span>
+          </div>
+        )}
+        {accuracy.total > 0 && (
+          <div className="card px-3 py-1.5 text-sm" title="Real results where the model's favorite won">
+            <span className="text-mute">Model called </span>
+            <span className="tabular font-bold text-up">{accuracy.correct}/{accuracy.total}</span>
           </div>
         )}
         <div className="ml-auto flex flex-wrap items-center gap-2">
