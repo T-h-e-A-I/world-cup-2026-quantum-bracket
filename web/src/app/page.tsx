@@ -77,6 +77,7 @@ export default function Home() {
               <li key={c.id}>
                 <Link
                   href={`/team/${slug(c.id)}`}
+                  prefetch={false}
                   className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2.5 hover:bg-void2"
                 >
                   <span className="w-4 text-xs text-faint">{i + 1}</span>
