@@ -211,7 +211,7 @@ export function drawBracketCard(x: CanvasRenderingContext2D, d: BracketCard): vo
   x.textAlign = "right";
   x.fillStyle = FAINT;
   x.font = `400 18px ${SANS}`;
-  x.fillText("world-cup-2026-quantum-bracket.vercel.app", W - PAD - 16, H - 22);
+  x.fillText("bracket.aweshislam.com", W - PAD - 16, H - 22);
   x.textAlign = "left";
 }
 

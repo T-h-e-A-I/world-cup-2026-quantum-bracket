@@ -17,7 +17,7 @@ const DESC =
   "All 2.1 billion possible brackets of the 2026 FIFA World Cup, held in superposition with exact probabilities — collapsing as each result comes in. Pick your team's odds, find when two teams can meet, and play out the bracket.";
 
 // Update if you use a custom domain — makes canonical + OG image URLs absolute.
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://world-cup-2026-quantum-bracket.vercel.app";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://bracket.aweshislam.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://world-cup-2026-quantum-bracket.vercel.app";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://bracket.aweshislam.com";
 
 export const dynamic = "force-static";
 
