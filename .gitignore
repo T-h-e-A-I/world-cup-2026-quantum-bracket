@@ -23,3 +23,5 @@ skills/
 .env*
 !.env.example
 .vercel
+
+incoming/
